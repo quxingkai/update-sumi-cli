@@ -1,0 +1,56 @@
+{
+  "name": "<%= name %>",
+  "displayName": "<%= displayName %>",
+  "description": "<%= description %>",
+  "publisher": "<%= publisher %>",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.36.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:HelloKaitian"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "HelloKaitian",
+        "title": "你好开天"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "npm run compile:entry && npm run compile:browser && npm run compile:node && npm run compile:worker",
+    "watch": "run-p watch:entry watch:browser watch:node watch:worker",
+    "postinstall": "node ./node_modules/vscode/bin/install",
+    "watch:entry": "webpack --watch --config ./configs/webpack.config.entry.js",
+    "watch:browser": "webpack --watch --config ./configs/webpack.config.browser.js",
+    "watch:node": "webpack --watch --config ./configs/webpack.config.node.js",
+    "watch:worker": "webpack --config ./configs/webpack.config.worker.js --progress --watch",
+    "compile:entry": "webpack --config ./configs/webpack.config.entry.js --progress",
+    "compile:browser": "webpack --config ./configs/webpack.config.browser.js --progress",
+    "compile:node": "webpack --config ./configs/webpack.config.node.js --progress",
+    "compile:worker": "webpack --config ./configs/webpack.config.worker.js --progress"
+  },
+  "devDependencies": {
+    "@types/mocha": "^2.2.42",
+    "@types/node": "^10.12.21",
+    "@types/vscode": "^1.39.0",
+    "@types/react": "^16.9.9",
+    "copy-webpack-plugin": "^5.0.4",
+    "css-loader": "^3.2.0",
+    "less-loader": "^5.0.0",
+    "npm-run-all": "^4.1.5",
+    "style-loader": "^1.0.0",
+    "ts-loader": "^6.0.4",
+    "tslint": "^5.12.1",
+    "typescript": "^3.3.1",
+    "vscode": "^1.1.28",
+    "webpack": "^4.41.2",
+    "webpack-cli": "^3.3.5"
+  }
+}
