@@ -21,7 +21,33 @@ module.exports = {
     rules: [
       {
         test: /\.tsx?$/,
-        loader: "ts-loader"
+        exclude: /node_modules/,
+        use: [
+          {
+            loader: 'babel-loader',
+            options: {
+              plugins: [[
+                'babel-plugin-import',
+                {
+                  libraryName: 'antd',
+                  libraryDirectory: 'lib',
+                  style: true,
+                },
+                'antd'
+              ]],
+              cacheDirectory: true,
+            }
+          },
+          {
+            loader: 'ts-loader',
+            options: {
+              transpileOnly: true,
+              compilerOptions: {
+                module: 'ES6'
+              }
+            }
+          },
+        ]
       },
       {
         test: /\.less$/,
