@@ -72,7 +72,7 @@ program.parse(process.argv);
 
   try {
     // check kaitian version
-    await checkKaitianVersion();
+    // await checkKaitianVersion();
   } catch (error) {
     console.log(error);
   }
