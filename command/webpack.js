@@ -6,14 +6,14 @@ const formatWebpackMessages = require('react-dev-utils/formatWebpackMessages');
 const parallelRunPromise = require('../lib/parallel-run-promise');
 const getEntryWebpackConfig = require('../lib/webpack/webpack.config.entry');
 const getBrowserWebpackConfig = require('../lib/webpack/webpack.config.browser');
-const webpackNodeConfig = require('../lib/webpack/webpack.config.node');
-const webpackWorkerConfig = require('../lib/webpack/webpack.config.worker');
+const getWebpackNodeConfig = require('../lib/webpack/webpack.config.node');
+const getWorkerWebpackConfig = require('../lib/webpack/webpack.config.worker');
 
 const webpackConfigs = [
   getBrowserWebpackConfig().toConfig(),
   getEntryWebpackConfig().toConfig(),
-  // webpackNodeConfig,
-  // webpackWorkerConfig
+  getWebpackNodeConfig().toConfig(),
+  getWorkerWebpackConfig().toConfig()
 ]
 
 module.exports = async function(compilerMethod) {
