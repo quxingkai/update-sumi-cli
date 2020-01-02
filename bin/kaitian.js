@@ -90,7 +90,7 @@ program
   .action((...args) => zip(...args).then(console.log('build completed...')));
 
 program
-  .command('install <name> <id> <version> <extensionDir>')
+  .command('install <publisher> <name> <version> [extensionDir]')
   .description('installing a extension')
   .action((...args) => install(...args).then(console.log('installation completed...')));
 
