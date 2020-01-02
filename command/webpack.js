@@ -1,16 +1,19 @@
 const path = require('path');
 const fse = require('fs-extra');
 const chalk = require('chalk');
-const webpack = require("webpack");
+const webpack = require('webpack');
+const Config = require('webpack-chain');
 const formatWebpackMessages = require('react-dev-utils/formatWebpackMessages');
 const parallelRunPromise = require('../lib/parallel-run-promise');
-const webpackEntryConfig = require('../lib/webpack/webpack.config.entry');
+const getEntryWebpackConfig = require('../lib/webpack/webpack.config.entry');
 const webpackBrowserConfig = require('../lib/webpack/webpack.config.browser');
 const webpackNodeConfig = require('../lib/webpack/webpack.config.node');
 const webpackWorkerConfig = require('../lib/webpack/webpack.config.worker');
 
+const config = new Config();
+
 const webpackConfigs = [
-  webpackEntryConfig,
+  getEntryWebpackConfig(config).toConfig(),
   webpackBrowserConfig,
   webpackNodeConfig,
   webpackWorkerConfig
