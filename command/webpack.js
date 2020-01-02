@@ -16,21 +16,21 @@ const webpackConfigs = [
   webpackWorkerConfig
 ]
 
-module.exports = async function() {
+module.exports = async function(compilerMethod) {
   const promises = webpackConfigs.map(webpackConfig => {
     return async () => {
-      await runTask(webpackConfig);
+      await runTask(webpackConfig, compilerMethod);
     }
   })
 
   await parallelRunPromise(promises, 1);
 };
 
-function runTask(webpackConfig) {
+function runTask(webpackConfig, compilerMethod) {
   return new Promise((resolve, reject) => {
     const compiler = webpack(webpackConfig);
 
-    compiler.watch({}, (err, stats) => {
+    const callback = (err, stats) => {
       if (err) {
         console.error('WEBPACK', (err.stack || err.toString()))
         reject(err)
@@ -70,6 +70,14 @@ function runTask(webpackConfig) {
       }
 
       resolve({ stats })
-    })
+    }
+
+    if (compilerMethod === 'run') {
+      compiler.run(callback);
+    }
+
+    if (compilerMethod == 'watch') {
+      compiler.watch({}, callback);
+    }
   })
 }
