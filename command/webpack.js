@@ -2,21 +2,18 @@ const path = require('path');
 const fse = require('fs-extra');
 const chalk = require('chalk');
 const webpack = require('webpack');
-const Config = require('webpack-chain');
 const formatWebpackMessages = require('react-dev-utils/formatWebpackMessages');
 const parallelRunPromise = require('../lib/parallel-run-promise');
 const getEntryWebpackConfig = require('../lib/webpack/webpack.config.entry');
-const webpackBrowserConfig = require('../lib/webpack/webpack.config.browser');
+const getBrowserWebpackConfig = require('../lib/webpack/webpack.config.browser');
 const webpackNodeConfig = require('../lib/webpack/webpack.config.node');
 const webpackWorkerConfig = require('../lib/webpack/webpack.config.worker');
 
-const config = new Config();
-
 const webpackConfigs = [
-  getEntryWebpackConfig(config).toConfig(),
-  webpackBrowserConfig,
-  webpackNodeConfig,
-  webpackWorkerConfig
+  getBrowserWebpackConfig().toConfig(),
+  getEntryWebpackConfig().toConfig(),
+  // webpackNodeConfig,
+  // webpackWorkerConfig
 ]
 
 module.exports = async function(compilerMethod) {
