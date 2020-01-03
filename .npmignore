@@ -1,8 +1,7 @@
 packages/
 .vscode/
 .kaitian/
-webpack.*.js
+configs/
 yarn-error.log
-tsconfig.json
 node_modules/
 dist/
