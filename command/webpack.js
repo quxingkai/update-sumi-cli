@@ -1,4 +1,5 @@
 const path = require('path');
+const fs = require('fs');
 const fse = require('fs-extra');
 const chalk = require('chalk');
 const webpack = require('webpack');
@@ -9,12 +10,22 @@ const getBrowserWebpackConfig = require('../lib/webpack/webpack.config.browser')
 const getWebpackNodeConfig = require('../lib/webpack/webpack.config.node');
 const getWorkerWebpackConfig = require('../lib/webpack/webpack.config.worker');
 
+const cwd = process.cwd();
+const pkgContent = JSON.parse(fs.readFileSync(path.join(cwd, 'package.json'), 'utf-8'));
+
 const webpackConfigs = [
-  getBrowserWebpackConfig().toConfig(),
-  getEntryWebpackConfig().toConfig(),
-  getWebpackNodeConfig().toConfig(),
-  getWorkerWebpackConfig().toConfig()
-]
+  getBrowserWebpackConfig,
+  getWebpackNodeConfig,
+  getEntryWebpackConfig,
+  getWorkerWebpackConfig
+].map(fn => {
+  const result = fn({cwd, pkgContent})
+  if (result) {
+    return result.toConfig()
+  }
+}).filter(n => n)
+
+// webpackConfigs.push(getBrowserWebpackConfig({cwd, pkgContent}));
 
 module.exports = async function(compilerMethod) {
   const promises = webpackConfigs.map(webpackConfig => {
