@@ -32,7 +32,7 @@ program
     try {
       // eslint-disable-next-line global-require
       await require('../command/init')();
-    }  catch (err) {
+    } catch (err) {
       console.error('kaitian init error:', err);
       process.exit(1);
     }
@@ -55,13 +55,28 @@ program
     try {
       // eslint-disable-next-line global-require
       await require('../command/webpack')('watch');
-    }  catch (err) {
+    } catch (err) {
       console.error('kaitian watch error:', err);
       process.exit(1);
     }
   });
 
-  program
+
+program
+  .command("dev")
+  .alias("w")
+  .option("-d, --debug", "启动调试模式")
+  .option("-p, --serverPort [serverPort]", "IDE Server 端口")
+  .option("-w, --workspaceDir [workspaceDir]", "工作空间路径，默认为当前目录")
+  .option("-e, --extensionDir <extensionDir>", "插件目录，支持指定多个插件，以逗号分隔，默认为当前目录")
+  .option("--execute [executeable path]", "IDE 可执行文件目录")
+  .description("运行 IDE 并加载指定插件")
+  .action(args => {
+    // eslint-disable-next-line global-require
+    require('../command/dev')(args);
+  });
+
+program
   .command('compile')
   .description('compile extension in production mode')
   .on('--help', () => {
@@ -78,7 +93,7 @@ program
     try {
       // eslint-disable-next-line global-require
       await require('../command/webpack')('run');
-    }  catch (err) {
+    } catch (err) {
       console.error('kaitian watch error:', err);
       process.exit(1);
     }
