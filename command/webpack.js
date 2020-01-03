@@ -15,10 +15,16 @@ const pkgContent = JSON.parse(fs.readFileSync(path.join(cwd, 'package.json'), 'u
 
 const webpackConfigs = [
   getBrowserWebpackConfig,
-  getEntryWebpackConfig,
   getWebpackNodeConfig,
+  getEntryWebpackConfig,
   getWorkerWebpackConfig
-].map(fn => fn({cwd, pkgContent}).toConfig());
+].map(fn => {
+  const result = fn({cwd, pkgContent})
+  console.log('result:', result);
+  if (result) {
+    return result.toConfig()
+  }
+}).filter(n => n)
 
 module.exports = async function(compilerMethod) {
   const promises = webpackConfigs.map(webpackConfig => {
