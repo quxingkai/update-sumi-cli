@@ -1,7 +1,4 @@
 import * as kaitian from "kaitian";
-import { str } from './module'
-
-console.log(str)
 
 export function activate(context: kaitian.ExtensionContext) {
   const { componentProxy } = context;

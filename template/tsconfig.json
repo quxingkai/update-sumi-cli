@@ -1,20 +1,28 @@
 {
-	"compilerOptions": {
-		"module": "commonjs",
-		"target": "es6",
-		"outDir": "out",
-		"jsx": "react",
-		"lib": [
-			"es6",
-			"dom",
-			"webworker"
-		],
-		"sourceMap": true,
-		"rootDir": "src",
-		"strict": true,
-	},
-	"exclude": [
-		"node_modules",
-		".vscode-test"
-	]
+  "compilerOptions": {
+    "baseUrl": ".",
+    "module": "commonjs",
+    "target": "es6",
+    "jsx": "react",
+    "outDir": "out",
+    "lib": [
+      "es6"
+    ],
+    "sourceMap": true,
+    "rootDir": "src",
+    "strict": false,
+    "experimentalDecorators": true
+  },
+  "exclude": [
+    "node_modules",
+    ".vscode-test"
+  ],
+  "typeRoots": [
+    "./node_modules/@types",
+    "./typings"
+  ],
+  "include": [
+    "./src/extension.ts",
+    "./src/node/**/*"
+  ]
 }
