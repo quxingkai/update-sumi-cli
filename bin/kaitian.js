@@ -39,12 +39,58 @@ program
   });
 
 program
+  .command('watch')
+  .description('watch extension in development mode')
+  .on('--help', () => {
+    console.log('');
+    console.log('Examples:');
+    console.log('  $ kaitian watch');
+  })
+  .action(async () => {
+    if (process.argv.slice(2).length > 1) {
+      program.outputHelp();
+      process.exit(0);
+    }
+
+    try {
+      // eslint-disable-next-line global-require
+      await require('../command/webpack')('watch');
+    }  catch (err) {
+      console.error('kaitian watch error:', err);
+      process.exit(1);
+    }
+  });
+
+  program
+  .command('compile')
+  .description('compile extension in production mode')
+  .on('--help', () => {
+    console.log('');
+    console.log('Examples:');
+    console.log('  $ kaitian compile');
+  })
+  .action(async () => {
+    if (process.argv.slice(2).length > 1) {
+      program.outputHelp();
+      process.exit(0);
+    }
+
+    try {
+      // eslint-disable-next-line global-require
+      await require('../command/webpack')('run');
+    }  catch (err) {
+      console.error('kaitian watch error:', err);
+      process.exit(1);
+    }
+  });
+
+program
   .command('zip [sourceDir] [targetDir] [ignoreFile]')
   .description('build a Zip file')
   .action((...args) => zip(...args).then(console.log('build completed...')));
 
 program
-  .command('install <name> <id> <version> <extensionDir>')
+  .command('install <publisher> <name> <version> [extensionDir]')
   .description('installing a extension')
   .action((...args) => install(...args).then(console.log('installation completed...')));
 
