@@ -20,11 +20,12 @@ const webpackConfigs = [
   getWorkerWebpackConfig
 ].map(fn => {
   const result = fn({cwd, pkgContent})
-  console.log('result:', result);
   if (result) {
     return result.toConfig()
   }
 }).filter(n => n)
+
+// webpackConfigs.push(getBrowserWebpackConfig({cwd, pkgContent}));
 
 module.exports = async function(compilerMethod) {
   const promises = webpackConfigs.map(webpackConfig => {
