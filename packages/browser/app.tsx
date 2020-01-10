@@ -12,6 +12,7 @@ export async function renderApp(opts: IClientAppOpts) {
   opts.wsPath = (window as any).KAITIAN_SDK_CONFIG.wsPath;
   opts.staticServicePath = (window as any).KAITIAN_SDK_CONFIG.staticServicePath;
   opts.webviewEndpoint = (window as any).KAITIAN_SDK_CONFIG.webviewEndpoint;
+  opts.extWorkerHost = './worker-host.js';
 
   opts.injector = injector;
   const app = new ClientApp(opts);

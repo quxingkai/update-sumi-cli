@@ -8,6 +8,9 @@
     "lib": [
       "es6"
     ],
+    "types": [
+			"./node_modules/@ali/kaitian"
+		],
     "sourceMap": true,
     "rootDir": "src",
     "strict": false,
