@@ -1,5 +1,6 @@
 import ComponentA from "./component-a";
 import ComponentB from "./component-b";
+import * as kt from 'kaitian-browser';    // kaitian browser API
 
 export default {
   left: {
@@ -7,7 +8,7 @@ export default {
     component: [
       {
         id: "componentA",
-        icon: "octicon octicon-browser",
+        icon: 'extension',
         panel: ComponentA
       }
     ]
@@ -17,7 +18,7 @@ export default {
     component: [
       {
         id: "componentB",
-        icon: "octicon octicon-browser",
+        icon: 'extension',
         panel: ComponentB
       }
     ]

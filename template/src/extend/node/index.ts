@@ -1,4 +1,4 @@
-import * as kaitian from "kaitian";
+import * as kaitian from "kaitian";   // kaitian node API (extends vscode)
 
 export function activate(context: kaitian.ExtensionContext) {
   const { componentProxy } = context;
