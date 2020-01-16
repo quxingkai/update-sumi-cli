@@ -2,7 +2,9 @@
 const chalk = require('chalk');
 const program = require('commander');
 const semver = require('semver');
-const { zip, install, update } = require('@alipay/cloud-ide-ext-vscode-extension-builder');
+const { install, update } = require('@alipay/cloud-ide-ext-vscode-extension-builder');
+const { zip } = require('@alipay/cloud-ide-ext-vscode-extension-builder/dist/code/zip');
+
 const packageConfig = require('../package');
 const checkVersion = require('../lib/checkVersion');
 
@@ -101,7 +103,10 @@ program
 program
   .command('zip [sourceDir] [targetDir] [ignoreFile]')
   .description('build a Zip file')
-  .action((...args) => zip(...args).then(console.log('build completed...')));
+  .action((...args) => zip(...args).then(() => {
+    console.log('build completed...');
+    process.exit(0);
+  }));
 
 program
   .command('install <publisher> <name> <version> [extensionDir]')
