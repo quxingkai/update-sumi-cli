@@ -11,19 +11,23 @@ const getWebpackNodeConfig = require('../lib/webpack/webpack.config.node');
 const getWorkerWebpackConfig = require('../lib/webpack/webpack.config.worker');
 
 const cwd = process.cwd();
-const pkgContent = JSON.parse(fs.readFileSync(path.join(cwd, 'package.json'), 'utf-8'));
+const pkgContent = JSON.parse(
+  fs.readFileSync(path.join(cwd, 'package.json'), 'utf-8'),
+);
 
 const webpackConfigs = [
   getBrowserWebpackConfig,
   getWebpackNodeConfig,
   getEntryWebpackConfig,
-  getWorkerWebpackConfig
-].map(fn => {
-  const result = fn({cwd, pkgContent})
-  if (result) {
-    return result.toConfig()
-  }
-}).filter(n => n)
+  getWorkerWebpackConfig,
+]
+  .map(fn => {
+    const result = fn({ cwd, pkgContent });
+    if (result) {
+      return result.toConfig();
+    }
+  })
+  .filter(n => n);
 
 // webpackConfigs.push(getBrowserWebpackConfig({cwd, pkgContent}));
 
@@ -31,8 +35,8 @@ module.exports = async function(compilerMethod) {
   const promises = webpackConfigs.map(webpackConfig => {
     return async () => {
       await runTask(webpackConfig, compilerMethod);
-    }
-  })
+    };
+  });
 
   await parallelRunPromise(promises, 1);
 };
@@ -43,9 +47,9 @@ function runTask(webpackConfig, compilerMethod) {
 
     const callback = (err, stats) => {
       if (err) {
-        console.error('WEBPACK', (err.stack || err.toString()))
-        reject(err)
-        return
+        console.error('WEBPACK', err.stack || err.toString());
+        reject(err);
+        return;
       }
 
       console.info(
@@ -57,38 +61,38 @@ function runTask(webpackConfig, compilerMethod) {
           entrypoints: false,
           modules: false,
         }),
-      )
+      );
 
-      const json = stats.toJson({}, true)
-      const messages = formatWebpackMessages(json)
-      const isSuccessful = !messages.errors.length && !messages.warnings.length
+      const json = stats.toJson({}, true);
+      const messages = formatWebpackMessages(json);
+      const isSuccessful = !messages.errors.length && !messages.warnings.length;
 
       if (isSuccessful) {
         // @ts-ignore
         if (stats.stats) {
-          console.info('WEBPACK', 'Compiled successfully')
+          console.info('WEBPACK', 'Compiled successfully');
         } else {
           console.info(
             'WEBPACK',
-            `Compiled successfully in ${(json.time / 1000).toFixed(1)}s!`
-          )
+            `Compiled successfully in ${(json.time / 1000).toFixed(1)}s!`,
+          );
         }
       } else if (messages.errors.length) {
-        console.log(messages.errors.join('\n\n'))
+        console.log(messages.errors.join('\n\n'));
       } else if (messages.warnings.length) {
-        console.warn('WEBPACK', 'Compiled with warnings.')
-        console.log(messages.warnings.join('\n\n'))
+        console.warn('WEBPACK', 'Compiled with warnings.');
+        console.log(messages.warnings.join('\n\n'));
       }
 
-      resolve({ stats })
-    }
+      resolve({ stats });
+    };
 
     if (compilerMethod === 'run') {
       compiler.run(callback);
     }
 
-    if (compilerMethod == 'watch') {
+    if (compilerMethod === 'watch') {
       compiler.watch({}, callback);
     }
-  })
+  });
 }
