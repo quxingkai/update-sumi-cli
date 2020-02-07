@@ -4,11 +4,14 @@ import * as Koa from "koa";
 import * as os from "os";
 import * as yargs from "yargs";
 import * as mount from "koa-mount";
-import * as koaStatic from 'koa-static';
 import { JSDOM } from "jsdom";
 import * as fs from "fs";
 import { Deferred, LogLevel } from "@ali/ide-core-common";
 import { IServerAppOpts, ServerApp, NodeModule } from "@ali/ide-core-node";
+import * as ip from 'ip';
+import chalk from 'chalk';
+
+const openBrowser = require('../../lib/openBrowser');
 
 const ALLOW_MIME = {
   gif: "image/gif",
@@ -25,6 +28,7 @@ const ALLOW_MIME = {
 };
 
 const DEV_PATH = path.join(os.homedir(), ".kaitian-dev");
+const deviceIp = ip.address();
 
 export async function startServer(arg1: NodeModule[] | Partial<IServerAppOpts>) {
   const port = yargs.argv.serverPort || 50999;
@@ -108,9 +112,9 @@ export async function startServer(arg1: NodeModule[] | Partial<IServerAppOpts>) 
           ideWorkspaceDir: "${workspaceDir}",
           extensionDir: "${extensionDir}",
           extensionCandidate: ${Array.isArray(extensionCandidate) ? JSON.stringify(extensionCandidate) : `["${extensionCandidate}"]`},
-          wsPath: "ws://127.0.0.1:${port}",
-          staticServicePath: "http://127.0.0.1:${port}",
-          webviewEndpoint: "http://127.0.0.1:${port}/webview",
+          wsPath: "ws://${deviceIp}:${port}",
+          staticServicePath: "http://${deviceIp}:${port}",
+          webviewEndpoint: "http://${deviceIp}:${port}/webview",
         } 
       `;
         const main = dom.window.document.body.querySelector("#main");
@@ -130,7 +134,13 @@ export async function startServer(arg1: NodeModule[] | Partial<IServerAppOpts>) 
   });
 
   server.listen(port, () => {
-    console.log(`server listen on port ${port}`);
+    console.log(`Server listen on port ${port}`);
+    openBrowser(`http://127.0.0.1:${port}`);
+
+    console.log(`
+      服务启动成功，请点击 http://${deviceIp}:${port} 访问 Kaitian IDE.
+    `);
+
     deferred.resolve(server);
   });
   return deferred.promise;
