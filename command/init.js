@@ -7,13 +7,13 @@ const inquirer = require('inquirer');
 
 const templateDir = path.join(__dirname, '../template');
 
-module.exports = async function() {
+module.exports = async function(target) {
   try {
     const questions = getQuestions();
     const answers = await inquirer.prompt(questions);
-    const targetDir = path.join(process.cwd(), answers.name);
+    const targetDir = target || path.join(process.cwd(), answers.name);
     const pathExists = await checkPathExists(targetDir);
-    if (!pathExists) {
+    if (pathExists) {
       await ejsRenderDir(templateDir, targetDir, {...answers});
       await fse.move(path.join(targetDir, 'vscode'), path.join(targetDir, '.vscode'));
       logMsg(answers.name);
@@ -82,6 +82,7 @@ async function checkPathExists(file) {
     });
     return answer.go;
   }
+  return true;
 }
 
 function getQuestions() {

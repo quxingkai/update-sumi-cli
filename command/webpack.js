@@ -1,7 +1,5 @@
 const path = require('path');
 const fs = require('fs');
-const fse = require('fs-extra');
-const chalk = require('chalk');
 const webpack = require('webpack');
 const formatWebpackMessages = require('react-dev-utils/formatWebpackMessages');
 const parallelRunPromise = require('../lib/parallel-run-promise');

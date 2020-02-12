@@ -2,6 +2,7 @@
 const chalk = require('chalk');
 const program = require('commander');
 const semver = require('semver');
+const path = require('path');
 const { install, update } = require('@alipay/cloud-ide-ext-vscode-extension-builder');
 const { zip } = require('@alipay/cloud-ide-ext-vscode-extension-builder/dist/code/zip');
 
@@ -18,22 +19,31 @@ program.arguments('<command>').action((cmd) => {
 });
 
 program
-  .command('init')
+  .command('init [targetDir]')
   .description('init a new extension powered by kaitian')
   .on('--help', () => {
     console.log('');
     console.log('Examples:');
     console.log('  $ kaitian init');
   })
-  .action(async () => {
-    if (process.argv.slice(2).length > 1) {
+  .action(async (targetDir) => {
+    if (process.argv.slice(2).length > 2) {
       program.outputHelp();
       process.exit(0);
     }
 
+    if (targetDir) {
+      if (targetDir === '.') {
+        targetDir = process.cwd();
+      } else if(targetDir.startsWith('..')) {
+        targetDir = path.join(process.cwd(), targetDir);
+      }
+    }
+
+    console.log(targetDir);
     try {
       // eslint-disable-next-line global-require
-      await require('../command/init')();
+      await require('../command/init')(targetDir);
     } catch (err) {
       console.error('kaitian init error:', err);
       process.exit(1);
