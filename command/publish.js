@@ -65,17 +65,13 @@ async function _publish(options) {
 
   const { url } = await file.upload(name, packageStream, { mode: 'internal' });
   request.post(
-    `${marketplace.apiAddress}/extension/update`,
+    `${marketplace.apiAddress}/extension/upload?name=${manifest.name}&url=${url}`,
     {
       method: 'POST',
       headers: {
         'x-account-id': marketplace.teamAccount,
         'x-master-key': marketplace.teamKey,
       },
-      body: JSON.stringify({
-        name: manifest.name,
-        url,
-      }),
     },
     (err, res) => {
       if (err) {
