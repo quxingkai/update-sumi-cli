@@ -111,12 +111,18 @@ program
   });
 
 program
-  .command('zip [sourceDir] [targetDir] [ignoreFile]')
-  .description('build a Zip file')
-  .action((...args) => zip(...args).then(() => {
-    console.log('build completed...');
-    process.exit(0);
-  }));
+  .command('package')
+  .description('Packages an extension')
+  .option('-o, --out [path]', 'Output .vsix extension file to [path] location')
+  .option('--baseContentUrl [url]', 'Prepend all relative links in README.md with this url.')
+  .option('--baseImagesUrl [url]', 'Prepend all relative image links in README.md with this url.')
+  .option('--yarn', 'Use yarn instead of npm')
+  .option('--ignoreFile [path]', 'Indicate alternative .vscodeignore')
+  .option('--skipCompile [boolean]', 'Skip run prepublish to compile.')
+  .action(async({ out, baseContentUrl, baseImagesUrl, yarn, ignoreFile, skipCompile }) => {
+    // eslint-disable-next-line global-require
+    await require('../command/package').packageCommand({ packagePath: out, baseContentUrl, baseImagesUrl, useYarn: yarn, ignoreFile, skipCompile });
+  });
 
 program
   .command('install <publisher> <name> <version> [extensionDir]')
