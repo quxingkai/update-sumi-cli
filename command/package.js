@@ -660,9 +660,7 @@ function validateManifest(manifest) {
   if (!manifest.engines) {
     throw new Error('Manifest missing field: engines');
   }
-  if (!manifest.engines['vscode']) {
-    throw new Error('Manifest missing field: engines.vscode');
-  }
+
   if (!manifest.engines['vscode']) {
     throw new Error('Manifest missing field: engines.kaitian');
   }
@@ -844,7 +842,7 @@ function collectFiles(cwd, useYarn = false, dependencyEntryPoints, ignoreFile) {
             f =>
               !ignore.some(i => minimatch(f, i, MinimatchOptions)) ||
               negate.some(i => minimatch(f, i.substr(1), MinimatchOptions)),
-          )
+          ),
         )
     );
   });

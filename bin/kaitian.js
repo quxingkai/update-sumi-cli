@@ -114,8 +114,6 @@ program
   .command('package')
   .description('Packages an extension')
   .option('-o, --out [path]', 'Output .vsix extension file to [path] location')
-  .option('--baseContentUrl [url]', 'Prepend all relative links in README.md with this url.')
-  .option('--baseImagesUrl [url]', 'Prepend all relative image links in README.md with this url.')
   .option('--yarn', 'Use yarn instead of npm')
   .option('--ignoreFile [path]', 'Indicate alternative .vscodeignore')
   .option('--skipCompile [boolean]', 'Skip run prepublish to compile.')
@@ -133,6 +131,23 @@ program
   .command('update')
   .description('upgrade the extension')
   .action((...args) => update(...args).then(console.log('upgrade completed...')));
+
+program
+  .command('publish')
+  .description('upgrade the extension')
+  .option('--file [path]', 'Publish the extension package located at the specified path.')
+  .option('--ignoreFile [path]', 'Indicate alternative .vscodeignore')
+  .option('--skipCompile [boolean]', 'Skip run prepublish to compile.')
+  .on('--help', () => {
+    return `
+      Examples:
+      $ kaitian publish --file=./my-extension-1.0.0.zip.
+`;
+  })
+  .action(async ({ file, ignoreFile, skipCompile }) => {
+    // eslint-disable-next-line global-require
+    await require('../command/publish')(file, ignoreFile, skipCompile);
+  });
 
 // add some useful info on help
 program.on('--help', () => {
