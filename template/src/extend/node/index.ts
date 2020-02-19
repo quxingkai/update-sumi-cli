@@ -1,13 +1,14 @@
 import * as kaitian from "kaitian";   // kaitian node API (extends vscode)
 
 export function activate(context: kaitian.ExtensionContext) {
-  const { componentProxy } = context;
+  const { componentProxy, registerExtendModuleService } = context;
   let count = 0;
-  return {
+  
+  registerExtendModuleService({
     async bizHello() {
-        await componentProxy.componentA.changeTitle(`node ${count++}`);
-        await kaitian.layout.toggleBottomPanel();
-        return "biz node message " + count;
-      }
-  };
+      await componentProxy.componentA.changeTitle(`node ${count++}`);
+      await kaitian.layout.toggleBottomPanel();
+      return "biz node message " + count;
+    }
+  });
 }
