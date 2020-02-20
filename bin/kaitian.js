@@ -40,7 +40,6 @@ program
       }
     }
 
-    console.log(targetDir);
     try {
       // eslint-disable-next-line global-require
       await require('../command/init')(targetDir);
