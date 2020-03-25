@@ -1,5 +1,5 @@
-import ComponentA from "./component-a";
-import ComponentB from "./component-b";
+import { ComponentA } from "./component-a";
+import { ComponentB } from "./component-b";
 import * as kt from 'kaitian-browser';    // kaitian browser API
 
 export default {

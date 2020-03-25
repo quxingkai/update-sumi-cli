@@ -4,12 +4,12 @@ import * as Koa from "koa";
 import * as os from "os";
 import * as yargs from "yargs";
 import * as mount from "koa-mount";
+import * as cors from '@koa/cors';
 import { JSDOM } from "jsdom";
 import * as fs from "fs";
 import { Deferred, LogLevel } from "@ali/ide-core-common";
 import { IServerAppOpts, ServerApp, NodeModule } from "@ali/ide-core-node";
 import * as ip from 'ip';
-import chalk from 'chalk';
 
 const openBrowser = require('../../lib/openBrowser');
 
@@ -49,6 +49,8 @@ export async function startServer(arg1: NodeModule[] | Partial<IServerAppOpts>) 
   const app = new Koa();
   const deferred = new Deferred<http.Server>();
 
+  // @ts-ignore
+  app.use(cors());
   let opts: IServerAppOpts = {
     workspaceDir,
     extensionDir,

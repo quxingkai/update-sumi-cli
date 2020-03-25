@@ -1,47 +1,39 @@
 import * as React from "react";
+import { useState, useEffect } from 'react';
+import { Button } from 'kaitian-browser';
 
 import { INodeService, IWorkerService } from "../common/service";
+import './style.less';
 
-const defaultTitle = "定制组件";
+const defaultTitle = "左侧面板";
 
-export default class ComponentA extends React.Component<
-  IComponentProps<INodeService, IWorkerService>,
-  {}
-> {
-  state = {
-    title: defaultTitle
-  };
+export const ComponentA: React.FC<IComponentProps<INodeService, IWorkerService>> = ({
+  kaitianExtendSet,
+  kaitianExtendService,
+}) => {
+  const [title, setTitle] = useState(defaultTitle);
 
-  componentDidMount() {
-    const { kaitianExtendSet } = this.props;
-
+  function changeTitleHandler(val: string) {
+    setTitle(defaultTitle + " " + val);
+  }
+  useEffect(() => {
     if (kaitianExtendSet) {
       kaitianExtendSet.set({
-        changeTitle: this.changeTitleHandler
+        changeTitle: changeTitleHandler,
       });
     }
-  }
+  }, []);
 
-  changeTitleHandler = (val: string) => {
-    this.setState({
-      title: defaultTitle + " " + val
+  function clickHandler() {
+    kaitianExtendService.node.bizHello().then(msg => {
+      console.log("component a host msg", msg);
     });
   }
 
-  clickHandler = () => {
-    if (this.props.kaitianExtendService) {
-      const kaitianExtendService = this.props.kaitianExtendService;
-      kaitianExtendService.node.bizHello().then(msg => {
-        console.log("component a host msg", msg);
-      });
-    }
-  }
-
-  render() {
-    return (
-      <div onClick={this.clickHandler} style={{ color: "yellow" }}>
-        {this.state.title}
-      </div>
-    );
-  }
+  return (
+    <div className="kt-extension-example-container">
+      <p>{title}</p>
+      <Button onClick={clickHandler}>change title</Button>
+    </div>
+  );
 }

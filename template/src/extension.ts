@@ -7,10 +7,7 @@ import * as kaitian from "kaitian";
 export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.commands.registerCommand("HelloKaitian", async () => {
-      const result = await vscode.window.showQuickPick(["reload", "cancel"]);
-      if (result === "reload") {
-        kaitian.ideWindow.reloadWindow();
-      }
+      vscode.window.showInformationMessage('Hello Kaitian');
     })
   );
 }

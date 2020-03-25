@@ -1,35 +1,38 @@
 import * as React from "react";
+import { useState, useEffect } from 'react';
+import { Button } from 'kaitian-browser';
 
 import { INodeService, IWorkerService } from "../common/service";
 
-const defaultTitle = "右侧定制组件";
+const defaultTitle = "右侧面板";
 
-export default class ComponentB extends React.Component<
-  IComponentProps<INodeService, IWorkerService>,
-  {}
-> {
-  state = {
-    title: defaultTitle
-  };
+export const ComponentB: React.FC<IComponentProps<INodeService, IWorkerService>> = ({
+  kaitianExtendSet,
+  kaitianExtendService,
+}) => {
+  const [title, setTitle] = useState(defaultTitle);
 
-  changeTitleHandler = (val: string) => {
-    this.setState({
-      title: defaultTitle + " " + val
-    });
+  function changeTitleHandler(val: string) {
+    setTitle(defaultTitle + " " + val);
   }
+  useEffect(() => {
+    if (kaitianExtendSet) {
+      kaitianExtendSet.set({
+        changeTitle: changeTitleHandler,
+      });
+    }
+  }, []);
 
-  clickHandler = () => {
-    const { kaitianExtendService } = this.props;
+  function clickHandler() {
     kaitianExtendService.worker.bizWorkerHello().then(msg => {
       console.log("component b host msg", msg);
     });
   }
 
-  render() {
-    return (
-      <div onClick={this.clickHandler} style={{ color: "orange" }}>
-        {this.state.title}
-      </div>
-    );
-  }
+  return (
+    <div>
+      <p>{title}</p>
+      <Button onClick={clickHandler}>change title</Button>
+    </div>
+  );
 }

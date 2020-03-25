@@ -16,7 +16,7 @@ module.exports = async function(target) {
     if (pathExists) {
       await ejsRenderDir(templateDir, targetDir, {...answers});
       await fse.move(path.join(targetDir, 'vscode'), path.join(targetDir, '.vscode'));
-      logMsg(answers.name);
+      logMsg(answers.name, target !== process.cwd());
     }
   } catch (err) {
     throw err;
@@ -90,10 +90,10 @@ function getQuestions() {
     {
       type: 'input',
       name: 'name',
-      message: 'What\'s the name of your extension?',
+      message: '请输入插件名称',
       validate: (value) => {
         if (!value) {
-          return 'extension name cannot be empty';
+          return '插件名不能为空';
         }
         return true;
       },
@@ -104,10 +104,10 @@ function getQuestions() {
     {
       type: 'input',
       name: 'publisher',
-      message: 'What\'s the publisher of your extension?',
+      message: '请输入插件 publisher，package.json 中的 publisher 字段',
       validate: (value) => {
         if (!value) {
-          return 'extension publisher cannot be empty';
+          return '插件 publisher 不能为空';
         }
         return true;
       },
@@ -118,30 +118,30 @@ function getQuestions() {
     {
       type: 'input',
       name: 'displayName',
-      message: 'What\'s the displayName of your extension?',
+      message: '请输入插件要显示的名称?',
     },
     {
       type: 'input',
       name: 'description',
-      message: 'What\'s the description of your extension?',
+      message: '请输入插件描述',
     },
   ];
 }
 
-function logMsg(extensionName) {
+function logMsg(extensionName, needCd) {
   console.log(`
-    Success! initialized a kaitian extension.
-    Inside that directory, you can run several commands:
+    插件初始化成功.
+    依次执行以下命令开始插件开发:
 
-    Start the extension in development mode.
-    ${chalk.yellow(`  cd ${extensionName}`)}
+    ${needCd ? chalk.yellow(`  cd ${extensionName}`) : ''}
     ${chalk.yellow('  npm install')}
     ${chalk.yellow('  npm run watch')}
 
-    Bundles the extension in production mode.
+    编译插件.
     ${chalk.yellow('  npm run compile')}
 
-    You can upload the ${extensionName}.zip files to the kaitian extension marketplace.
+    打包插件.
+    ${chalk.yellow('  kaitian package')}
 
     Happy hacking!
   `);
