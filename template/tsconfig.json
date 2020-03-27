@@ -10,7 +10,8 @@
       "DOM"
     ],
     "types": [
-			"./node_modules/@ali/kaitian"
+      "./node_modules/@ali/kaitian",
+      "./typings"
 		],
     "sourceMap": true,
     "rootDir": "src",
@@ -22,8 +23,7 @@
     ".vscode-test"
   ],
   "typeRoots": [
-    "./node_modules/@types",
-    "./typings"
+    "./node_modules/@types"
   ],
   "include": [
     "./src/extension.ts",
