@@ -9,9 +9,9 @@
       "es6",
       "DOM"
     ],
-    "types": [
-      "./node_modules/@ali/kaitian",
-      "./typings"
+    "typeRoots": [
+      "./node_modules/@types",
+      "./node_modules/@ali"
 		],
     "sourceMap": true,
     "rootDir": "src",
@@ -21,9 +21,6 @@
   "exclude": [
     "node_modules",
     ".vscode-test"
-  ],
-  "typeRoots": [
-    "./node_modules/@types"
   ],
   "include": [
     "./src/extension.ts",
