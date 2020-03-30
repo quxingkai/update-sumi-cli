@@ -69,6 +69,7 @@ module.exports = function (args) {
 
     const options = {
       env: {
+        ...process.env,
         PATH: shellPath.sync(),
         VSCODE_NLS_CONFIG: process.env.VSCODE_NLS_CONFIG,
       },
