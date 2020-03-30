@@ -41,6 +41,7 @@ renderApp({
   useCdnIcon: false,
   modules,
   defaultPreferences: {
+    "application.confirmExit": "never",
     "general.theme": "ide-dark",
     "general.icon": "vscode-icons"
   }
