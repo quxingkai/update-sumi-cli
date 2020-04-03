@@ -4,7 +4,6 @@ const program = require('commander');
 const semver = require('semver');
 const path = require('path');
 const { install, update } = require('@alipay/cloud-ide-ext-vscode-extension-builder');
-const { zip } = require('@alipay/cloud-ide-ext-vscode-extension-builder/dist/code/zip');
 
 const packageConfig = require('../package');
 const checkVersion = require('../lib/checkVersion');
@@ -114,7 +113,7 @@ program
   .description('Packages an extension')
   .option('-o, --out [path]', 'Output .vsix extension file to [path] location')
   .option('--yarn', 'Use yarn instead of npm')
-  .option('--ignoreFile [path]', 'Indicate alternative .vscodeignore')
+  .option('--ignoreFile [path]', 'Indicate alternative .ktignore')
   .option('--skipCompile [boolean]', 'Skip run prepublish to compile.')
   .action(async({ out, baseContentUrl, baseImagesUrl, yarn, ignoreFile, skipCompile }) => {
     // eslint-disable-next-line global-require
@@ -135,7 +134,7 @@ program
   .command('publish')
   .description('upgrade the extension')
   .option('--file [path]', 'Publish the extension package located at the specified path.')
-  .option('--ignoreFile [path]', 'Indicate alternative .vscodeignore')
+  .option('--ignoreFile [path]', 'Indicate alternative .ktignore')
   .option('--skipCompile [boolean]', 'Skip run prepublish to compile.')
   .on('--help', () => {
     return `

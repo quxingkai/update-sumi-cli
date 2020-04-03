@@ -758,6 +758,7 @@ function toContentTypes(files) {
 exports.toContentTypes = toContentTypes;
 const defaultIgnore = [
   '.vscodeignore',
+  '.ktignore',
   'package-lock.json',
   'yarn.lock',
   '.editorconfig',
@@ -800,12 +801,19 @@ function collectAllFiles(cwd, useYarn = false, dependencyEntryPoints) {
     return Promise.all(promises).then(util.flatten);
   });
 }
+function resolveIgnoreFile(cwd) {
+  if(fs.existsSync(path.join(cwd, '.ktignore'))) {
+    return path.join(cwd, '.ktignore');
+  } else if (fs.existsSync(path.join(cwd, '.vscodeignore'))) {
+    return path.join(cwd, '.vscodeignore');
+  }
+}
 function collectFiles(cwd, useYarn = false, dependencyEntryPoints, ignoreFile) {
   return collectAllFiles(cwd, useYarn, dependencyEntryPoints).then(files => {
     files = files.filter(f => !/\r$/m.test(f));
     return (
       readFile(
-        ignoreFile || path.join(cwd, '.vscodeignore'),
+        ignoreFile || resolveIgnoreFile(cwd),
         'utf8',
       )
         .catch(err =>
@@ -978,7 +986,7 @@ async function pack(options = {}) {
   const jsFiles = files.filter(f => /\.js$/i.test(f.path));
   if (files.length > 5000 || jsFiles.length > 100) {
     console.log(
-      `This extension consists of ${files.length} files, out of which ${jsFiles.length} are JavaScript files. For performance reasons, you should bundle your extension: https://aka.ms/vscode-bundle-extension . You should also exclude unnecessary files by adding them to your .vscodeignore: https://aka.ms/vscode-vscodeignore`
+      `此插件由 ${files.length} 个文件组成，其中包含 ${jsFiles.length} 个 JavaScript 文件，出于性能原因，建议您仅打包必要运行文件，您还可以通过配置 .ktignore 或 .vscodeignore 文件来排除不必要的文件`,
     );
   }
   const packagePath = await getPackagePath(cwd, manifest, options);
