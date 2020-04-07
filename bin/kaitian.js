@@ -205,8 +205,8 @@ function checkNodeVersion() {
     console.log();
     console.log(
       chalk.red(
-        `You must upgrade node to ${packageConfig.engines.node} to use kaitian`
-      )
+        `You must upgrade node to ${packageConfig.engines.node} to use Kaitian Cli`,
+      ),
     );
     console.log();
     process.exit(1);
