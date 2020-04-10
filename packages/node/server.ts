@@ -2,7 +2,6 @@ import * as path from "path";
 import * as http from "http";
 import * as Koa from "koa";
 import * as os from "os";
-import * as yargs from "yargs";
 import * as mount from "koa-mount";
 import * as cors from '@koa/cors';
 import { JSDOM } from "jsdom";
@@ -10,6 +9,7 @@ import * as fs from "fs";
 import { Deferred, LogLevel } from "@ali/ide-core-common";
 import { IServerAppOpts, ServerApp, NodeModule } from "@ali/ide-core-node";
 import * as ip from 'ip';
+import { ConstructorOf } from "@ali/common-di";
 
 const openBrowser = require('../../lib/openBrowser');
 
@@ -30,15 +30,31 @@ const ALLOW_MIME = {
 const DEV_PATH = path.join(os.homedir(), ".kaitian-dev");
 const deviceIp = ip.address();
 
-export async function startServer(arg1: NodeModule[] | Partial<IServerAppOpts>) {
-  const port = yargs.argv.serverPort || 50999;
-  const workspaceDir = (yargs.argv.workspaceDir as string) || __dirname;
-  const extensionDir = path.join(DEV_PATH, "extensions");
-  const extensionCandidate = (yargs.argv.extensionCandidate || __dirname) as string[];
-  console.log(yargs.argv.extensionCandidate);
-  const isDev = yargs.argv.isDev as string;
+interface IDEServerParams {
+  modules?: ConstructorOf<NodeModule>[];
+  options?: Partial<IServerAppOpts>;
+}
 
-  if (isDev) {
+interface ServerParams {
+  port: number;
+  isDev: boolean;
+  workspaceDir?: string;
+  extensionCandidate?: string[];
+}
+
+export async function startServer(serverParams: ServerParams, ideServerParams: IDEServerParams) {
+  const {
+    port = 50999,
+    workspaceDir = __dirname,
+    extensionCandidate = [__dirname],
+    isDev,
+  } = serverParams;
+  console.log(extensionCandidate);
+
+  const extensionDir = path.join(DEV_PATH, "extensions");
+  const isDevelopment = !!isDev;
+
+  if (isDevelopment) {
     process.env.IS_DEV = "1";
   }
 
@@ -52,7 +68,7 @@ export async function startServer(arg1: NodeModule[] | Partial<IServerAppOpts>) 
   // @ts-ignore
   app.use(cors());
   let opts: IServerAppOpts = {
-    workspaceDir,
+    workspaceDir: workspaceDir,
     extensionDir,
     webSocketHandler: [],
     use: app.use.bind(app),
@@ -66,15 +82,18 @@ export async function startServer(arg1: NodeModule[] | Partial<IServerAppOpts>) 
     logLevel: LogLevel.Verbose,
     staticAllowPath: [extensionDir, ...extensionCandidate]
   };
-  if (Array.isArray(arg1)) {
+
+  if (Array.isArray(ideServerParams.modules)) {
     opts = {
       ...opts,
-      modulesInstances: arg1
+      modules: ideServerParams.modules,
     };
-  } else {
+  }
+
+  if (ideServerParams.options) {
     opts = {
       ...opts,
-      ...arg1
+      ...ideServerParams.options,
     };
   }
 
@@ -113,7 +132,7 @@ export async function startServer(arg1: NodeModule[] | Partial<IServerAppOpts>) 
         window.KAITIAN_SDK_CONFIG = {
           ideWorkspaceDir: "${workspaceDir}",
           extensionDir: "${extensionDir}",
-          extensionCandidate: ${Array.isArray(extensionCandidate) ? JSON.stringify(extensionCandidate) : `["${extensionCandidate}"]`},
+          extensionCandidate: ${JSON.stringify(extensionCandidate)},
           wsPath: "ws://${deviceIp}:${port}",
           staticServicePath: "http://${deviceIp}:${port}",
           webviewEndpoint: "http://${deviceIp}:${port}/webview",
