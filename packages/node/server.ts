@@ -30,6 +30,8 @@ const ALLOW_MIME = {
 const DEV_PATH = path.join(os.homedir(), ".kaitian-dev");
 const deviceIp = ip.address();
 
+const extensionDir = path.join(DEV_PATH, "extensions");
+
 interface IDEServerParams {
   modules?: ConstructorOf<NodeModule>[];
   options?: Partial<IServerAppOpts>;
@@ -51,7 +53,6 @@ export async function startServer(serverParams: ServerParams, ideServerParams: I
   } = serverParams;
   console.log(extensionCandidate);
 
-  const extensionDir = path.join(DEV_PATH, "extensions");
   const isDevelopment = !!isDev;
 
   if (isDevelopment) {
@@ -133,6 +134,7 @@ export async function startServer(serverParams: ServerParams, ideServerParams: I
           ideWorkspaceDir: "${workspaceDir}",
           extensionDir: "${extensionDir}",
           extensionCandidate: ${JSON.stringify(extensionCandidate)},
+          port: "${port}",
           wsPath: "ws://${deviceIp}:${port}",
           staticServicePath: "http://${deviceIp}:${port}",
           webviewEndpoint: "http://${deviceIp}:${port}/webview",
@@ -156,7 +158,7 @@ export async function startServer(serverParams: ServerParams, ideServerParams: I
 
   server.listen(port, () => {
     console.log(`Server listen on port ${port}`);
-    openBrowser(`http://127.0.0.1:${port}`);
+    openBrowser(`http://${deviceIp}:${port}`);
 
     console.log(`
       服务启动成功，请点击 http://${deviceIp}:${port} 访问 Kaitian IDE.

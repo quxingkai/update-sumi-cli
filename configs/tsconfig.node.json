@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "../packages/node"
+  ],
+  "compilerOptions": {
+    "outDir": "../scripts/node",
+    "noEmitOnError": true
+  }
+}

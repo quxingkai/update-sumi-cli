@@ -75,7 +75,7 @@ module.exports = function (args) {
       },
     };
 
-    const serverProcess = cp.fork(path.join(__dirname, "../scripts/node/server.js"), argv, options);
+    const serverProcess = cp.fork(path.join(__dirname, "../scripts/node/index.js"), argv, options);
 
     serverProcess.on("exit", (code, signal) => {
       console.log(`${code}, ${signal}`);
