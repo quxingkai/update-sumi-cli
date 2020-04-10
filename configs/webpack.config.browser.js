@@ -1,4 +1,3 @@
-const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
@@ -7,6 +6,7 @@ const path = require('path');
 const darkTheme = require('@ant-design/dark-theme');
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const TerserJSPlugin = require('terser-webpack-plugin');
+const AssetsPlugin = require('assets-webpack-plugin');
 
 const tsConfigPath = path.join(__dirname, './tsconfig.json');
 const dir = path.join(__dirname, '../packages/browser');
@@ -111,7 +111,7 @@ module.exports = {
               name: '[name].[ext]',
               outputPath: 'fonts/',
               publicPath:
-                'https://dev.g.alicdn.com/tao-ide/ide-core/0.0.1/fonts', //"http://localhost:8080/fonts"
+                'https://dev.g.alicdn.com/tao-ide/ide-core/0.0.1/fonts', // "http://localhost:8080/fonts"
             },
           },
         ],
@@ -129,14 +129,20 @@ module.exports = {
     minimizer: [new TerserJSPlugin({}), new OptimizeCSSAssetsPlugin({})],
   },
   plugins: [
-    new HtmlWebpackPlugin({
-      template: path.join(__dirname, '../packages/browser/index.html'),
+    // new HtmlWebpackPlugin({
+    //   template: path.join(__dirname, '../packages/browser/index.html'),
+    // }),
+    new AssetsPlugin({
+      path: distDir,
+      filename: 'assets.json',
+      prettyPrint: true,
     }),
     new MiniCssExtractPlugin({
       filename: 'main.css',
     }),
     new CopyPlugin([
       { from: path.join(dir, 'vendor'), to: distDir },
+      { from: path.join(dir, 'index.html'), to: distDir },
     ]),
     new FriendlyErrorsWebpackPlugin({
       compilationSuccessInfo: {
@@ -145,13 +151,4 @@ module.exports = {
       clearConsole: true,
     }),
   ],
-  devServer: {
-    disableHostCheck: true,
-    port: 8888,
-    host: '0.0.0.0',
-    quiet: true,
-    overlay: true,
-    open: false,
-    hot: true,
-  },
 };
