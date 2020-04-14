@@ -1,6 +1,6 @@
 {
   "name": "@ali/kaitian-integration",
-  "version": "1.0.0-alpha.1",
+  "version": "1.0.0-alpha.10",
   "description": "A simple CLI for kaitian.",
   "main": "",
   "files": [
@@ -22,9 +22,9 @@
     "watch:exthost": "npm run build:exthost -- --watch",
     "build:ext-worker-host": "webpack --config ./configs/webpack.config.ext-worker.js --progress",
     "build:ext-worker-host:watch": "npm run build:ext-worker-host -- --watch",
+    "build1": "npm run build:node && npm run build:browser && npm run build:exthost && npm run build:webview && npm run build:ext-worker-host",
     "build": "run-p build:node build:browser build:exthost build:webview build:ext-worker-host",
-    "watch": "run-p watch:node watch:browser watch:exthost watch:webview watch:ext-worker-host",
-    "prepublishOnly": "npm run build"
+    "watch": "run-p watch:node watch:browser watch:exthost watch:webview watch:ext-worker-host"
   },
   "dependencies": {
     "@ali/common-di": "^5.0.0",
@@ -48,6 +48,7 @@
     "npm-run-all": "^4.1.5",
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
+    "read-pkg-up": "^7.0.1",
     "regenerator-runtime": "^0.13.3",
     "runscript": "^1.4.0",
     "shell-path": "^2.1.0",
@@ -63,9 +64,11 @@
     "node": ">=10.15.0"
   },
   "devDependencies": {
+    "@types/ejs": "^3.0.2",
     "@types/koa-mount": "^4.0.0",
     "@types/react": "^16.9.17",
     "@types/react-dom": "^16.9.4",
+    "@types/read-pkg-up": "^6.0.0",
     "@types/yargs-parser": "^15.0.0",
     "assets-webpack-plugin": "^3.9.12",
     "copy-webpack-plugin": "^5.1.1",

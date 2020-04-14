@@ -1,12 +1,10 @@
-'use strict';
-
-var chalk = require('chalk');
-var execSync = require('child_process').execSync;
-var spawn = require('cross-spawn');
-var open = require('open');
+const chalk = require('chalk');
+const execSync = require('child_process').execSync;
+const spawn = require('cross-spawn');
+const open = require('open');
 
 // https://github.com/sindresorhus/open#app
-var OSX_CHROME = 'google chrome';
+const OSX_CHROME = 'google chrome';
 
 const Actions = Object.freeze({
   NONE: 0,
@@ -71,7 +69,7 @@ function startBrowserProcess(browser, url, args) {
       // Try our best to reuse existing tab
       // on OS X Google Chrome with AppleScript
       execSync('ps cax | grep "Google Chrome"');
-      execSync('osascript openChrome.applescript "' + encodeURI(url) + '"', {
+      execSync(`osascript openChrome.applescript "${encodeURI(url)}"`, {
         cwd: __dirname,
         stdio: 'ignore',
       });
@@ -97,7 +95,7 @@ function startBrowserProcess(browser, url, args) {
   // Fallback to open
   // (It will always open new tab)
   try {
-    var options = { app: browser, wait: false };
+    const options = { app: browser, wait: false };
     open(url, options).catch(() => {}); // Prevent `unhandledRejection` error.
     return true;
   } catch (err) {
@@ -109,7 +107,7 @@ function startBrowserProcess(browser, url, args) {
  * Reads the BROWSER environment variable and decides what to do with it. Returns
  * true if it opened a browser or ran a node.js script, otherwise false.
  */
-function openBrowser(url) {
+export function openBrowser(url) {
   const { action, value, args } = getBrowserEnv();
   switch (action) {
     case Actions.NONE:
@@ -123,5 +121,3 @@ function openBrowser(url) {
       throw new Error('Not implemented.');
   }
 }
-
-module.exports = openBrowser;

@@ -8,7 +8,6 @@ import execa from 'execa';
 import chalk from 'chalk';
 import rimraf from 'rimraf';
 import ora from 'ora';
-import * as lru from 'lru';
 
 import { safeParseJson } from './util';
 
@@ -100,7 +99,7 @@ async function checkUpdate() {
 // })();
 
 interface EngineYml {
-  version: string;
+  current: string;
 }
 
 export function whenReady(target: any, propertyKey: string, desc: PropertyDescriptor) {
@@ -111,51 +110,16 @@ export function whenReady(target: any, propertyKey: string, desc: PropertyDescri
   };
 }
 
-export function memoize(target: any, key: string, descriptor: any) {
-	let fnKey: string | null = null;
-	let fn: Function | null = null;
-
-	if (typeof descriptor.value === 'function') {
-		fnKey = 'value';
-		fn = descriptor.value;
-
-		if (fn!.length !== 0) {
-			console.warn('Memoize should only be used in functions with zero parameters');
-		}
-	} else if (typeof descriptor.get === 'function') {
-		fnKey = 'get';
-		fn = descriptor.get;
-	}
-
-	if (!fn) {
-		throw new Error('not supported');
-	}
-
-  const memoizeKey = `$memoize$${key}`;
-
-  var cache = new LRU(1);
-
-	descriptor[fnKey!] = function (...args: any[]) {
-		if (!this.hasOwnProperty(memoizeKey)) {
-			Object.defineProperty(this, memoizeKey, {
-				configurable: false,
-				enumerable: false,
-				writable: false,
-				value: () => {
-          fn!.apply(this, args)
-        },
-			});
-		}
-
-		return this[memoizeKey];
-	};
-}
-
-export class EngineViewer {
+export class EngineModule {
   protected ready: Promise<any>;
 
   constructor() {
     this.ready = this.init();
+  }
+
+  get currentEnginePath() {
+    // os_tmpdir/ali-kaitian-engine/1.0.0-alpha.0/node_modules/@ali/kaitian-integration/lib
+    return path.join(engineDir, this.current, 'node_modules', enginePkgName, 'lib');
   }
 
   get current() {
@@ -182,7 +146,7 @@ export class EngineViewer {
     }
 
     await this.installEngine(engineDir, version);
-    console.log('Engine@v', version, 'was installed');
+    console.log(`Engine@v${version} was installed`);
   }
 
   public async remove(v?: string) {
@@ -265,7 +229,7 @@ export class EngineViewer {
   @whenReady
   public async use(v?: string) {
     const version = await this.checkEngineVersion(v);
-    await this.writeEngineYml({ version });
+    await this.writeEngineYml({ current: version });
   }
 
   private async installEngine(targetDir: string, version: string) {

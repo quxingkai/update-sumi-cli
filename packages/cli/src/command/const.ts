@@ -1,2 +1,2 @@
-exports.npmClient = 'tnpm';
-exports.enginePkgName = '@ali/kaitian-integration';
+export const npmClient = 'tnpm';
+export const enginePkgName = '@ali/kaitian-integration';

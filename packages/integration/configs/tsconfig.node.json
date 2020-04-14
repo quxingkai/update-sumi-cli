@@ -1,13 +1,26 @@
 {
   "compilerOptions": {
+    "target": "ESNext",
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "jsx": "preserve",
     "skipLibCheck": true,
-    "noEmitOnError": true,
-    "target": "es5",
+    "allowJs": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "experimentalDecorators": true,
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitReturns": true,
+    "suppressImplicitAnyIndexErrors": true,
+    "declaration": true,
     "baseUrl": "../src/node",
-    "lib": ["es2015"],
-    "outDir": "../lib/node",
+    "outDir": "../lib/node"
   },
   "include": [
     "../src/node"
+  ],
+  "exclude": [
+    "node_modules",
+    "../lib"
   ]
 }

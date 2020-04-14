@@ -9,7 +9,9 @@ import { install, update } from '@alipay/cloud-ide-ext-vscode-extension-builder'
 
 const packageConfig = require('../package');
 const checkVersion = require('../scripts/checkVersion');
-import { EngineViewer }from './command/engine';
+import { EngineModule }from './command/engine';
+
+const engineModule = new EngineModule();
 
 program.version(packageConfig.version).usage('<command> [options]');
 
@@ -85,7 +87,7 @@ program
   .description("launch Kaitian IDE load specified extension.")
   .action(args => {
     // eslint-disable-next-line global-require
-    require('../lib/command/dev')(args);
+    require('../lib/command/dev')(args, engineModule);
   });
 
 program
@@ -162,25 +164,24 @@ program
        remove [version]  Remove a version
   `.trim())
   .action(async (subcommand: string, version?: string) => {
-    const engineViewer = new EngineViewer();
     switch (subcommand) {
       case 'ls':
-        engineViewer.list();
+        engineModule.list();
         break;
       case 'ls-remote':
-        engineViewer.listRemote();
+        engineModule.listRemote();
         break;
       case 'use':
-        engineViewer.use(version);
+        engineModule.use(version);
         break;
       case 'add':
-        engineViewer.add(version);
+        engineModule.add(version);
         break;
       case 'current':
-        console.log(engineViewer.current);
+        console.log(engineModule.current);
         break;
       case 'remove':
-        engineViewer.remove(version);
+        engineModule.remove(version);
         break;
       default:
         console.log(chalk.yellow(`Invalid subcommand [${subcommand}]`));
