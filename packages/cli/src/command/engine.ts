@@ -15,7 +15,7 @@ const { npmClient, enginePkgName } = require('./const');
 
 const fsPromise = fs.promises;
 
-const engineDir = path.resolve(__dirname, '../../tmpdir/'/* os.tmpdir() */, 'ali-kaitian-engine');
+const engineDir = path.resolve(os.tmpdir(), 'ali-kaitian-engine');
 
 async function ensureDir(dir: string) {
   if (!fs.existsSync(dir)) {
