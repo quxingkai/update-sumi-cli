@@ -1,14 +1,15 @@
 import path from 'path';
 import http from 'http';
+import fs from 'fs';
+import { promisify } from 'util';
+
 import Koa from 'koa';
 import mount from 'koa-mount';
 import cors from '@koa/cors';
-import fs from 'fs';
 import ejs from 'ejs';
 import { Deferred, LogLevel } from '@ali/ide-core-common';
 import { IServerAppOpts, ServerApp, NodeModule } from '@ali/ide-core-node';
 import { ConstructorOf } from '@ali/common-di';
-import readPkgUp from 'read-pkg-up';
 
 import * as env from './env';
 import { openBrowser } from './openBrowser';
@@ -42,6 +43,17 @@ interface ServerParams {
   isDev: boolean;
   workspaceDir?: string;
   extensionCandidate?: string[];
+}
+
+async function readPkgUp() {
+  const pkgJsonStr = await promisify(fs.readFile)(path.resolve(__dirname, '../../package.json'), 'utf8');
+  try {
+    return JSON.parse(pkgJsonStr);
+  } catch (err) {
+    console.warn('json parse failed with:', pkgJsonStr);
+    console.warn(err);
+  }
+  return {};
 }
 
 export async function startServer(serverParams: ServerParams, ideServerParams: IDEServerParams) {
@@ -137,7 +149,8 @@ export async function startServer(serverParams: ServerParams, ideServerParams: I
           webviewEndpoint: `http://${deviceIp}:${port}/webview`,
         };
 
-        const { packageJson: pkg } = await readPkgUp();
+        // todo: 手动读取外层 `package.json`
+        const pkg = await readPkgUp();
 
         const meta = {
           ideVersion: pkg.dependencies['@ali/ide-core-common'],
