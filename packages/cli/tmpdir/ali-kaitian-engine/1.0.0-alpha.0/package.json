@@ -1,0 +1,7 @@
+{
+  "name": "@ali/kaitian-engine",
+  "version": "1.0.0-alpha.0",
+  "dependencies": {
+    "@ali/kaitian-integration": "1.0.0-alpha.0"
+  }
+}

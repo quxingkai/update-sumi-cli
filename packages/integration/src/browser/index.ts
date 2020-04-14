@@ -1,11 +1,11 @@
-import "@ali/ide-i18n/lib/browser";
-import { CommonBrowserModules } from "@ali/ide-startup/lib/browser/common-modules";
-import { BrowserModule, ConstructorOf, SlotLocation } from "@ali/ide-core-browser";
-import { ExpressFileServerModule } from "@ali/ide-express-file-server/lib/browser";
-import "@ali/ide-core-browser/lib/style/index.less";
-import "@ali/ide-core-browser/lib/style/icon.less";
+import '@ali/ide-i18n/lib/browser';
+import { CommonBrowserModules } from '@ali/ide-startup/lib/browser/common-modules';
+import { BrowserModule, ConstructorOf, SlotLocation } from '@ali/ide-core-browser';
+import { ExpressFileServerModule } from '@ali/ide-express-file-server/lib/browser';
+import '@ali/ide-core-browser/lib/style/index.less';
+import '@ali/ide-core-browser/lib/style/icon.less';
 
-import { renderApp } from "./app";
+import { renderApp } from './app';
 
 export const modules: ConstructorOf<BrowserModule>[] = [
   ...CommonBrowserModules,
@@ -41,8 +41,8 @@ renderApp({
   useCdnIcon: false,
   modules,
   defaultPreferences: {
-    "application.confirmExit": "never",
-    "general.theme": "ide-dark",
-    "general.icon": "vscode-icons"
+    'application.confirmExit': 'never',
+    'general.theme': 'ide-dark',
+    'general.icon': 'vscode-icons'
   }
 });

@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var yargs = require("yargs");
 var modules_1 = require("./modules");
 var server_1 = require("./server");
-var _a = yargs.argv, serverPort = _a.serverPort, workspaceDir = _a.workspaceDir, extensionCandidate = _a.extensionCandidate, isDev = _a.isDev;
+var argv = require('yargs-parser')(process.argv.slice(2));
+var serverPort = argv.serverPort, workspaceDir = argv.workspaceDir, extensionCandidate = argv.extensionCandidate, isDev = argv.isDev;
 server_1.startServer({
     port: Number(serverPort),
     isDev: !!isDev,

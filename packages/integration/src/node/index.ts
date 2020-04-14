@@ -1,14 +1,14 @@
-import * as yargs from "yargs";
-
 import { modules } from './modules';
 import { startServer } from './server';
+
+const argv = require('yargs-parser')(process.argv.slice(2));
 
 const {
   serverPort,
   workspaceDir,
   extensionCandidate,
   isDev,
-} = yargs.argv;
+} = argv;
 
 startServer({
   port: Number(serverPort as string),

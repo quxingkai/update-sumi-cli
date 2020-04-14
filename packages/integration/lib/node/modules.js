@@ -1,28 +1,14 @@
 "use strict";
+var __spreadArrays = (this && this.__spreadArrays) || function () {
+    for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
+    for (var r = Array(s), k = 0, i = 0; i < il; i++)
+        for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
+            r[k] = a[j];
+    return r;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+var common_modules_1 = require("@ali/ide-startup/lib/node/common-modules");
 var ide_express_file_server_1 = require("@ali/ide-express-file-server");
-var node_1 = require("@ali/ide-file-service/lib/node");
-var node_2 = require("@ali/ide-storage/lib/node");
-var node_3 = require("@ali/ide-extension-storage/lib/node");
-var ide_process_1 = require("@ali/ide-process");
-var ide_search_1 = require("@ali/ide-search");
-var node_4 = require("@ali/ide-terminal-next/lib/node");
-var node_5 = require("@ali/ide-logs/lib/node");
-var ide_kaitian_extension_1 = require("@ali/ide-kaitian-extension");
-var node_6 = require("@ali/ide-debug/lib/node");
-var ide_extension_manager_1 = require("@ali/ide-extension-manager");
-var node_7 = require("@ali/ide-file-scheme/lib/node");
-exports.modules = [
-    node_5.LogServiceModule,
-    node_1.FileServiceModule,
-    node_3.ExtensionStorageModule,
-    node_2.StorageModule,
-    ide_process_1.ProcessModule,
-    ide_search_1.SearchModule,
-    node_4.TerminalNodePtyModule,
-    node_6.DebugModule,
-    ide_kaitian_extension_1.KaitianExtensionModule,
-    ide_extension_manager_1.ExtensionManagerModule,
-    node_7.FileSchemeNodeModule,
+exports.modules = __spreadArrays(common_modules_1.CommonNodeModules, [
     ide_express_file_server_1.ExpressFileServerModule,
-];
+]);

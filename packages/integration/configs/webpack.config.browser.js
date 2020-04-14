@@ -3,10 +3,11 @@ const FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
 const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 const path = require('path');
-const darkTheme = require('@ant-design/dark-theme');
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const TerserJSPlugin = require('terser-webpack-plugin');
 const AssetsPlugin = require('assets-webpack-plugin');
+
+const { lessLoader } = require('./webpack-util');
 
 const tsConfigPath = path.join(__dirname, './tsconfig.json');
 const dir = path.join(__dirname, '../src/browser');
@@ -46,7 +47,7 @@ module.exports = {
         test: /\.tsx?$/,
         use: [
           {
-            loader: 'ts-loader',
+            loader: require.resolve('ts-loader'),
             options: {
               happyPackMode: true,
               transpileOnly: true,
@@ -64,49 +65,41 @@ module.exports = {
       },
       {
         test: /\.css$/,
-        use: [MiniCssExtractPlugin.loader, 'css-loader'],
+        use: [MiniCssExtractPlugin.loader, require.resolve('css-loader')],
       },
       {
         test: /\.module.less$/,
         use: [
           {
-            loader: 'style-loader',
+            loader: require.resolve('style-loader'),
           },
           {
-            loader: 'css-loader',
+            loader: require.resolve('css-loader'),
             options: {
               sourceMap: true,
               modules: true,
             },
           },
-          {
-            loader: 'less-loader',
-          },
+          lessLoader(),
         ],
       },
       {
         test: /^((?!\.module).)*less$/,
         use: [
           {
-            loader: 'style-loader',
+            loader: require.resolve('style-loader'),
           },
           {
-            loader: 'css-loader',
+            loader: require.resolve('css-loader'),
           },
-          {
-            loader: 'less-loader',
-            options: {
-              javascriptEnabled: true,
-              modifyVars: darkTheme.default,
-            },
-          },
+          lessLoader(),
         ],
       },
       {
         test: /\.(woff(2)?|ttf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,
         use: [
           {
-            loader: 'file-loader',
+            loader: require.resolve('file-loader'),
             options: {
               name: '[name].[ext]',
               outputPath: 'fonts/',
