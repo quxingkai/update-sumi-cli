@@ -1,12 +1,16 @@
-const path = require('path');
-const fs = require('fs');
-const webpack = require('webpack');
-const formatWebpackMessages = require('react-dev-utils/formatWebpackMessages');
-const parallelRunPromise = require('../scripts/parallel-run-promise');
-const getEntryWebpackConfig = require('../scripts/webpack/webpack.config.entry');
-const getBrowserWebpackConfig = require('../scripts/webpack/webpack.config.browser');
-const getWebpackNodeConfig = require('../scripts/webpack/webpack.config.node');
-const getWorkerWebpackConfig = require('../scripts/webpack/webpack.config.worker');
+import path from 'path';
+import fs from 'fs';
+import webpack from 'webpack';
+import execa from 'execa';
+import formatWebpackMessages from 'react-dev-utils/formatWebpackMessages';
+
+import parallelRunPromise from '../../scripts/parallel-run-promise';
+import getEntryWebpackConfig from '../../scripts/webpack/webpack.config.entry';
+import getBrowserWebpackConfig from '../../scripts/webpack/webpack.config.browser';
+import getWebpackNodeConfig from '../../scripts/webpack/webpack.config.node';
+import getWorkerWebpackConfig from '../../scripts/webpack/webpack.config.worker';
+
+// TODO: mode#production/development
 
 const cwd = process.cwd();
 const pkgContent = JSON.parse(
@@ -29,21 +33,23 @@ const webpackConfigs = [
 
 // webpackConfigs.push(getBrowserWebpackConfig({cwd, pkgContent}));
 
-module.exports = async function(compilerMethod) {
-  const promises = webpackConfigs.map(webpackConfig => {
+type CompilerMethod = 'run' | 'watch';
+
+module.exports = async function(compilerMethod: CompilerMethod) {
+  const webpackTasks = webpackConfigs.map(webpackConfig => {
     return async () => {
       await runTask(webpackConfig, compilerMethod);
     };
   });
 
-  await parallelRunPromise(promises, 1);
+  await parallelRunPromise(webpackTasks, 1);
 };
 
-function runTask(webpackConfig, compilerMethod) {
+function runTask(webpackConfig: any, compilerMethod: CompilerMethod) {
   return new Promise((resolve, reject) => {
     const compiler = webpack(webpackConfig);
 
-    const callback = (err, stats) => {
+    const callback = (err: Error, stats: any) => {
       if (err) {
         console.error('WEBPACK', err.stack || err.toString());
         reject(err);

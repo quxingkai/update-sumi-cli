@@ -5,6 +5,7 @@ import chalk from 'chalk';
 import program from 'commander';
 import semver from 'semver';
 import path from 'path';
+// TODO: 迁移到 http://gitlab.alibaba-inc.com/kaitian/ide-extension-installer
 import { install, update } from '@alipay/cloud-ide-ext-vscode-extension-builder';
 
 const packageConfig = require('../package');
