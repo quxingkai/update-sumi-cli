@@ -11,12 +11,13 @@ import ora from 'ora';
 import { safeParseJson } from '../util/json';
 import { ensureDir } from '../util/fs';
 import { YmlConfiguration } from '../util/yml-config';
+import { kaitianInfraDir } from './const';
 
 const { npmClient, enginePkgName } = require('./const');
 
 const fsPromise = fs.promises;
 
-const engineDir = path.resolve(os.tmpdir(), 'ali-kaitian-engine');
+const engineDir = path.resolve(kaitianInfraDir, 'ali-kaitian-engine');
 
 function getEngineFolderPath(version: string) {
   return path.join(engineDir, version);

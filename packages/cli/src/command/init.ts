@@ -8,7 +8,7 @@ import ora from 'ora';
 import execa from 'execa';
 import copy from 'kopy';
 
-import { npmClient } from './const';
+import { npmClient, kaitianInfraDir } from './const';
 
 const fsPromise = fs.promises;
 
@@ -16,7 +16,7 @@ const defaultTemplatePkg = '@ali/kaitian-simple-ext-template';
 
 const spinner = ora();
 
-const templateDir = path.resolve(os.tmpdir(), 'ali-kaitian-template');
+const templateDir = path.resolve(kaitianInfraDir, 'ali-kaitian-template');
 
 async function ensurePkgJSONFile(targetDir: string) {
   if (!fs.existsSync(targetDir)) {
