@@ -9,7 +9,7 @@ import path from 'path';
 import { install, update } from '@alipay/cloud-ide-ext-vscode-extension-builder';
 
 const packageConfig = require('../package');
-const checkVersion = require('../scripts/checkVersion');
+const checkVersion = require('./scripts/checkVersion');
 import { EngineModule }from './command/engine';
 
 const engineModule = new EngineModule();

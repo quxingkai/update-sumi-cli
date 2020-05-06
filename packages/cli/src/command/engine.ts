@@ -3,43 +3,20 @@ import path from 'path';
 import fs from 'fs';
 import { promisify } from 'util';
 
-import yaml from 'yaml';
 import execa from 'execa';
 import chalk from 'chalk';
 import rimraf from 'rimraf';
 import ora from 'ora';
 
-import { safeParseJson } from './util';
+import { safeParseJson } from '../util/json';
+import { ensureDir } from '../util/fs';
+import { YmlConfiguration } from '../util/yml-config';
 
 const { npmClient, enginePkgName } = require('./const');
 
 const fsPromise = fs.promises;
 
 const engineDir = path.resolve(os.tmpdir(), 'ali-kaitian-engine');
-
-async function ensureDir(dir: string) {
-  if (!fs.existsSync(dir)) {
-    await fsPromise.mkdir(dir);
-  }
-}
-
-async function ensureDirSync(dir: string) {
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir);
-  }
-}
-
-function ensureFileSync(filePath: string) {
-  if (!fs.existsSync(filePath)) {
-    fs.writeFileSync(filePath, '', { encoding: 'utf8' });
-  }
-}
-
-async function ensureFile(filePath: string) {
-  if (!fs.existsSync(filePath)) {
-    await fsPromise.writeFile(filePath, '', { encoding: 'utf8' });
-  }
-}
 
 function getEngineFolderPath(version: string) {
   return path.join(engineDir, version);
@@ -59,45 +36,6 @@ async function getPkgJSONFile(targetDir: string, version: string) {
   await fsPromise.writeFile(pkgJSONFilePath, json, 'utf8');
 }
 
-async function checkEngine(version: string) {
-  const targetDir = getEngineFolderPath(version);
-  // 这里从完备性上来说还要检查 node_modules 和 package.json
-  if (fs.existsSync(targetDir)) {
-    console.log('engine', version, 'installed');
-    return true;
-  }
-  // await installEngine(targetDir, version);
-}
-
-// alpha: 1.0.0-alpha.0
-// latest: 1.0.0-alpha.0
-function getLatestVersion(stdout: string) {
-  const [latestVersionStr] = stdout
-    .split('\n')
-    .filter(n => n.startsWith('latest'));
-
-  return latestVersionStr.replace('latest:', '').trim();
-}
-
-async function checkUpdate() {
-  const { stdout } = await execa(npmClient, ['dist-tag', 'ls', enginePkgName]);
-  const latestVersion = getLatestVersion(stdout);
-}
-
-// checkUpdate();
-
-// (async () => {
-//   try {
-//     await ensureDir(engineDir);
-
-//     await scanEngineDir();
-
-//     await checkEngine('1.0.0-alpha.0');
-//   } catch (err) {
-//     console.log(err);
-//   }
-// })();
-
 interface EngineYml {
   current: string;
 }
@@ -113,23 +51,32 @@ export function whenReady(target: any, propertyKey: string, desc: PropertyDescri
 export class EngineModule {
   protected ready: Promise<any>;
 
+  private readonly ymlConfig: YmlConfiguration;
+
   constructor() {
+    this.ymlConfig = new YmlConfiguration<EngineYml>(engineDir, 'engine.yml');
     this.ready = this.init();
   }
 
   get currentEnginePath() {
+    if (!this.current) {
+      console.warn(chalk.yellow('Please install an engine firstly'));
+      process.exit(1);
+    }
+
+    // console.log
     // os_tmpdir/ali-kaitian-engine/1.0.0-alpha.0/node_modules/@ali/kaitian-integration/lib
     return path.join(engineDir, this.current, 'node_modules', enginePkgName, 'lib');
   }
 
   get current() {
-    const config = this.readEngineYmlSync();
+    const config = this.ymlConfig.readYmlSync();
     return config.current;
   }
 
   set current(value: string) {
-    const config = this.readEngineYmlSync();
-    this.writeEngineYmlSync({ ...config, current: value });
+    const config = this.ymlConfig.readYmlSync();
+    this.ymlConfig.writeYmlSync({ ...config, current: value });
   }
 
   @whenReady
@@ -229,7 +176,7 @@ export class EngineModule {
   @whenReady
   public async use(v?: string) {
     const version = await this.checkEngineVersion(v);
-    await this.writeEngineYml({ current: version });
+    await this.ymlConfig.writeYml({ current: version });
   }
 
   private async installEngine(targetDir: string, version: string) {
@@ -245,23 +192,13 @@ export class EngineModule {
       // console.warn('Please exec `kaitian cli install`');
     }
 
-    const config = await this.readEngineYml();
+    const config = await this.ymlConfig.readYml();
     if (!config.current || !engineList.includes(config.current)) {
       // fallback to the first in engineList
       const current = engineList[0];
-      await this.writeEngineYml({ ...config, current });
+      await this.ymlConfig.writeYml({ ...config, current });
       // console.warn(`We are using engine@v${current }`);
     }
-  }
-
-  private async getCurrent() {
-    const config = await this.readEngineYml();
-    return config.current;
-  }
-
-  private async setCurrent(current: string) {
-    const config = await this.readEngineYml();
-    await this.writeEngineYml({ ...config, current });
   }
 
   private async getRemoteEngines(): Promise<string[] | undefined> {
@@ -335,45 +272,5 @@ export class EngineModule {
     }));
     const engineVersionList = fileNameList.filter(n => !!n);
     return engineVersionList;
-  }
-
-  private readEngineYmlSync() {
-    ensureDirSync(engineDir);
-    const ymlPath = path.join(engineDir, 'engine.yml');
-    ensureFileSync(ymlPath);
-    const ymlContent = fs.readFileSync(ymlPath, { encoding: 'utf8' });
-    return yaml.parse(ymlContent) || {};
-  }
-
-  private async readEngineYml() {
-    await ensureDir(engineDir);
-    const ymlPath = path.join(engineDir, 'engine.yml');
-    ensureFileSync(ymlPath);
-    const ymlContent = await fsPromise.readFile(ymlPath, 'utf8');
-    return yaml.parse(ymlContent) || {};
-  }
-
-  private writeEngineYmlSync(content: Partial<EngineYml>) {
-    ensureDirSync(engineDir);
-    const ymlPath = path.join(engineDir, 'engine.yml');
-    fs.openSync(ymlPath, 'w');
-    const ymlContent = fs.readFileSync(ymlPath, 'utf8');
-    return fs.writeFileSync(
-      ymlPath,
-      yaml.stringify(Object.assign({}, ymlContent, content)),
-      'utf8',
-    );
-  }
-
-  private async writeEngineYml(content: Partial<EngineYml>) {
-    await ensureDir(engineDir);
-    const ymlPath = path.join(engineDir, 'engine.yml');
-    await fsPromise.open(ymlPath, 'w');
-    const ymlContent = await fsPromise.readFile(ymlPath, 'utf8');
-    return await fsPromise.writeFile(
-      ymlPath,
-      yaml.stringify(Object.assign({}, ymlContent, content)),
-      'utf8',
-    );
   }
 }

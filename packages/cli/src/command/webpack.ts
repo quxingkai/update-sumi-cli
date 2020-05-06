@@ -4,11 +4,11 @@ import webpack from 'webpack';
 import execa from 'execa';
 import formatWebpackMessages from 'react-dev-utils/formatWebpackMessages';
 
-import parallelRunPromise from '../../scripts/parallel-run-promise';
-import getEntryWebpackConfig from '../../scripts/webpack/webpack.config.entry';
-import getBrowserWebpackConfig from '../../scripts/webpack/webpack.config.browser';
-import getWebpackNodeConfig from '../../scripts/webpack/webpack.config.node';
-import getWorkerWebpackConfig from '../../scripts/webpack/webpack.config.worker';
+import parallelRunPromise from '../scripts/parallel-run-promise';
+import getEntryWebpackConfig from '../scripts/webpack/webpack.config.entry';
+import getBrowserWebpackConfig from '../scripts/webpack/webpack.config.browser';
+import getWebpackNodeConfig from '../scripts/webpack/webpack.config.node';
+import getWorkerWebpackConfig from '../scripts/webpack/webpack.config.worker';
 
 // TODO: mode#production/development
 

@@ -1,3 +1,6 @@
+import { YmlConfiguration } from '../util/yml-config';
+import { kaitianConfigDir, marketplaceApiAddress } from './const';
+
 const fse = require('fs-extra');
 const yauzl = require('yauzl');
 const tmp = require('tmp');
@@ -8,10 +11,18 @@ const request = require('request');
 const Basement = require('@alipay/basement');
 
 const { pack } = require('./package');
-const marketplace = require('../../../configs/marketplace/teamAk.json');
 const basementApi = require('../../../configs/marketplace/basement.json');
 
 const tmpName = denodeify(tmp.tmpName);
+
+interface ConfigurationYml {
+  marketplace: {
+    teamAccount: string;
+    teamKey: string;
+  };
+}
+
+const ymlConfig = new YmlConfiguration<ConfigurationYml>(kaitianConfigDir, 'kaitian.yml');
 
 function readManifestFromPackage(packagePath) {
   return new Promise((c, e) => {
@@ -64,13 +75,16 @@ async function _publish(options) {
   console.log(chalk.green(`Upload ${name} to OSS...`));
 
   const { url } = await file.upload(name, packageStream, { mode: 'internal' });
+
+  const config = await ymlConfig.readYml();
+
   request.post(
-    `${marketplace.apiAddress}/extension/upload?name=${manifest.name}&url=${url}`,
+    `${marketplaceApiAddress}/extension/upload?name=${manifest.name}&url=${url}`,
     {
       method: 'POST',
       headers: {
-        'x-account-id': marketplace.teamAccount,
-        'x-master-key': marketplace.teamKey,
+        'x-account-id': config.marketplace.teamAccount,
+        'x-master-key': config.marketplace.teamKey,
       },
     },
     (err, res) => {
