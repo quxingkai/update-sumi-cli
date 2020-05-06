@@ -11,6 +11,8 @@ import { install, update } from '@alipay/cloud-ide-ext-vscode-extension-builder'
 const packageConfig = require('../package');
 const checkVersion = require('./scripts/checkVersion');
 import { EngineModule }from './command/engine';
+import { kaitianInfraDir } from './command/const';
+import { ensureDirSync } from './util/fs';
 
 const engineModule = new EngineModule();
 
@@ -208,6 +210,8 @@ program.parse(process.argv);
 (async () => {
   // check node version
   checkNodeVersion();
+
+  ensureDirSync(kaitianInfraDir);
 
   try {
     // check kaitian version

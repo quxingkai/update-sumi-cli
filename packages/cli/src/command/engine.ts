@@ -17,7 +17,7 @@ const { npmClient, enginePkgName } = require('./const');
 
 const fsPromise = fs.promises;
 
-const engineDir = path.resolve(kaitianInfraDir, 'ali-kaitian-engine');
+const engineDir = path.resolve(kaitianInfraDir, 'engines');
 
 function getEngineFolderPath(version: string) {
   return path.join(engineDir, version);
@@ -66,7 +66,7 @@ export class EngineModule {
     }
 
     // console.log
-    // os_tmpdir/ali-kaitian-engine/1.0.0-alpha.0/node_modules/@ali/kaitian-integration/lib
+    // /engines/1.0.0-alpha.0/node_modules/@ali/kaitian-integration/lib
     return path.join(engineDir, this.current, 'node_modules', enginePkgName, 'lib');
   }
 
@@ -95,6 +95,9 @@ export class EngineModule {
 
     await this.installEngine(engineDir, version);
     console.log(`Engine@v${version} was installed`);
+    if (!await this.getCurrent()) {
+      await this.setCurrent(version);
+    }
   }
 
   public async remove(v?: string) {
@@ -178,6 +181,17 @@ export class EngineModule {
   public async use(v?: string) {
     const version = await this.checkEngineVersion(v);
     await this.ymlConfig.writeYml({ current: version });
+  }
+
+  private async getCurrent() {
+    const config = await this.ymlConfig.readYml();
+    return config.current;
+  }
+
+  private async setCurrent(value: string) {
+    const config = await this.ymlConfig.readYml();
+    await this.ymlConfig.writeYml({ ...config, current: value });
+    console.log(`Set v${value} as the current engine`);
   }
 
   private async installEngine(targetDir: string, version: string) {
@@ -264,6 +278,7 @@ export class EngineModule {
 
   // memoized for 5s
   private async getInstalledEngines() {
+    await ensureDir(kaitianInfraDir);
     await ensureDir(engineDir);
     const files = await fsPromise.readdir(engineDir);
     const fileNameList = await Promise.all(files.map(async (fileName) => {
