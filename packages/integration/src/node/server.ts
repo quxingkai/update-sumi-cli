@@ -89,6 +89,7 @@ export async function startServer(serverParams: ServerParams, ideServerParams: I
       masterKey: 'FWPUOR6NAH3mntLqKtNOvqKt',
       extensionDir: path.join(DEV_PATH, 'extensions')
     },
+    extHost: path.join(__dirname, '../../hosted/ext.process.js'),
     logDir: path.join(DEV_PATH, 'logs'),
     logLevel: LogLevel.Verbose,
     staticAllowPath: [extensionDir, ...extensionCandidate]

@@ -415,7 +415,7 @@ class MarkdownProcessor extends BaseProcessor {
         } else if (!owner && !repositoryName && issueNumber) {
           // Issue in own repository
           result =
-            `${prefix 
+            `${prefix
             }[#${issueNumber}](${urljoin(
               this.repositoryUrl,
               'issues',
@@ -802,17 +802,24 @@ function collectAllFiles(cwd, useYarn = false, dependencyEntryPoints) {
   });
 }
 function resolveIgnoreFile(cwd) {
-  if(fs.existsSync(path.join(cwd, '.ktignore'))) {
+  if (fs.existsSync(path.join(cwd, '.ktignore'))) {
     return path.join(cwd, '.ktignore');
   } else if (fs.existsSync(path.join(cwd, '.vscodeignore'))) {
     return path.join(cwd, '.vscodeignore');
+  } else {
+    console.log(`
+    为了优化构建性能，建议您在项目中创建 .ktignore 文件排除运行时不必要的文件.
+    `);
+    return null;
   }
 }
-function collectFiles(cwd, useYarn = false, dependencyEntryPoints, ignoreFile) {
+function collectFiles(cwd, useYarn = false, dependencyEntryPoints, _ignoreFile) {
   return collectAllFiles(cwd, useYarn, dependencyEntryPoints).then(files => {
     files = files.filter(f => !/\r$/m.test(f));
-    return (
-      readFile(
+    const ignoreFile = _ignoreFile || resolveIgnoreFile(cwd);
+    let ignoreFiles;
+    if (ignoreFile) {
+      ignoreFiles = readFile(
         ignoreFile || resolveIgnoreFile(cwd),
         'utf8',
       )
@@ -830,7 +837,7 @@ function collectFiles(cwd, useYarn = false, dependencyEntryPoints, ignoreFile) {
             .split(/[\n\r]/)
             .map(s => s.trim())
             .filter(s => !!s)
-            .filter(i => !/^\s*#/.test(i))
+            .filter(i => !/^\s*#/.test(i)),
         )
         // Add '/**' to possible folder names
         .then(ignore => [
@@ -838,8 +845,13 @@ function collectFiles(cwd, useYarn = false, dependencyEntryPoints, ignoreFile) {
           ...ignore
             .filter(i => !/(^|\/)[^/]*\*[^/]*$/.test(i))
             .map(i => (/\/$/.test(i) ? `${i}**` : `${i}/**`)),
-        ])
-        // Combine with default ignore list
+        ]);
+    } else {
+      ignoreFiles = Promise.resolve([]);
+    }
+    return (
+    // Combine with default ignore list
+      ignoreFiles
         .then(ignore => [...defaultIgnore, ...ignore, '!package.json'])
         // Split into ignore and negate list
         .then(ignore => _.partition(ignore, i => !/^\s*!/.test(i)))
@@ -863,7 +875,7 @@ function processFiles(processors, files) {
     return util.sequence(processors.map(p => () => p.onEnd())).then(() => {
       const assets = _.flatten(processors.map(p => p.assets));
       const vsix = processors.reduce((r, p) => ({ ...r, ...p.vsix }), {
-        assets
+        assets,
       });
       return Promise.all([toVsixManifest(vsix), toContentTypes(files)]).then(
         result => {

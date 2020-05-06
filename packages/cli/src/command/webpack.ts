@@ -47,7 +47,7 @@ module.exports = async function(compilerMethod: CompilerMethod) {
 
 function runTask(webpackConfig: any, compilerMethod: CompilerMethod) {
   return new Promise((resolve, reject) => {
-    const compiler = webpack(webpackConfig);
+    const compiler = webpack(compilerMethod === 'watch' ? Object.assign(webpackConfig, { devtool: 'inline-source-map' }) : webpackConfig);
 
     const callback = (err: Error, stats: any) => {
       if (err) {
