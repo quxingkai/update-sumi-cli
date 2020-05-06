@@ -157,12 +157,12 @@ program
   .command('engine [subcommand] [version]')
   .description(`
   list all ide-framework engines for developing extensions
-       ls                List installed engine versions
-       ls-remote         List remote engine versions available for install
-       current           Display currently selected version
-       use [version]     Change current engine to [version]
-       add [version]     Download and install a [version]
-       remove [version]  Remove a version
+       ls                   List installed engine versions
+       ls-remote            List remote engine versions available for install
+       current              Display currently selected version
+       use [version]        Change current engine to [version]
+       install [version]    Download and install a [version]
+       uninstall [version]  Remove a version
   `.trim())
   .action(async (subcommand: string, version?: string) => {
     switch (subcommand) {
@@ -175,12 +175,14 @@ program
       case 'use':
         engineModule.use(version);
         break;
+      case 'install':
       case 'add':
         engineModule.add(version);
         break;
       case 'current':
         console.log(engineModule.current);
         break;
+      case 'uninstall':
       case 'remove':
         engineModule.remove(version);
         break;
