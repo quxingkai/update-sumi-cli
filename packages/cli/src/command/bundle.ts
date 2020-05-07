@@ -1,7 +1,9 @@
 import path from 'path';
 import fs from 'fs';
+
 import webpack from 'webpack';
 import execa from 'execa';
+import { Command } from 'clipanion';
 import formatWebpackMessages from 'react-dev-utils/formatWebpackMessages';
 
 import parallelRunPromise from '../scripts/parallel-run-promise';
@@ -35,7 +37,7 @@ const webpackConfigs = [
 
 type CompilerMethod = 'run' | 'watch';
 
-module.exports = async function(compilerMethod: CompilerMethod) {
+async function bundle(compilerMethod: CompilerMethod) {
   const webpackTasks = webpackConfigs.map(webpackConfig => {
     return async () => {
       await runTask(webpackConfig, compilerMethod);
@@ -99,4 +101,48 @@ function runTask(webpackConfig: any, compilerMethod: CompilerMethod) {
       compiler.watch({}, callback);
     }
   });
+}
+
+export class WatchCommand extends Command {
+  static usage = Command.Usage({
+    description: 'watch extension in development mode',
+    examples: [
+      [
+        'Run watch mode when developing a kaitian extension project',
+        'kaitian watch',
+      ],
+    ],
+  });
+
+  @Command.Path('watch')
+  async execute() {
+    try {
+      await bundle('watch');
+    } catch (err) {
+      console.error('kaitian watch error:', err);
+      process.exit(1);
+    }
+  }
+}
+
+export class CompileCommand extends Command {
+  static usage = Command.Usage({
+    description: 'compile extension in production mode',
+    examples: [
+      [
+        'Compile code when developing a kaitian extension project',
+        'kaitian compile',
+      ],
+    ],
+  });
+
+  @Command.Path('compile')
+  async execute() {
+    try {
+      await bundle('run');
+    } catch (err) {
+      console.error('kaitian watch error:', err);
+      process.exit(1);
+    }
+  }
 }

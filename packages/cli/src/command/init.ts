@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs';
-import os from 'os';
 
+import { Command } from 'clipanion';
 import chalk from 'chalk';
 import inquirer from 'inquirer';
 import ora from 'ora';
@@ -33,7 +33,25 @@ async function ensurePkgJSONFile(targetDir: string) {
   await fsPromise.writeFile(targetPkgJSONPath, json, 'utf8');
 }
 
-module.exports = async function(targetPath: string, targetTemplatePkg: string = defaultTemplatePkg) {
+function logMsg() {
+  console.log(`
+    插件初始化成功.
+    依次执行以下命令开始插件开发:
+
+    ${chalk.yellow('  npm install')}
+    ${chalk.yellow('  npm run watch')}
+
+    编译插件.
+    ${chalk.yellow('  npm run compile')}
+
+    打包插件.
+    ${chalk.yellow('  kaitian package')}
+
+    Happy hacking!
+  `);
+}
+
+async function init(targetPath: string, targetTemplatePkg: string = defaultTemplatePkg) {
   await ensurePkgJSONFile(templateDir);
   spinner.start(`Downloading template package ${targetTemplatePkg}`);
   // TODO: fetch latest version for package and update when necessary
@@ -58,20 +76,39 @@ module.exports = async function(targetPath: string, targetTemplatePkg: string = 
   }
 };
 
-function logMsg() {
-  console.log(`
-    插件初始化成功.
-    依次执行以下命令开始插件开发:
+export class InitCommand extends Command {
+  static usage = Command.Usage({
+    description: 'init a new extension powered by kaitian',
+    examples: [
+      [
+        'Initialize a kaitian extension project in target-folder',
+        'cd target-folder && kaitian init',
+      ],
+    ],
+  });
 
-    ${chalk.yellow('  npm install')}
-    ${chalk.yellow('  npm run watch')}
+  @Command.String({ required: false })
+  public targetDir?: string;
 
-    编译插件.
-    ${chalk.yellow('  npm run compile')}
+  get realTargetDir() {
+    if (this.targetDir) {
+      if (this.targetDir === '.') {
+        return process.cwd();
+      } else if (this.targetDir.startsWith('..')) {
+        return path.join(process.cwd(), this.targetDir);
+      }
+    }
 
-    打包插件.
-    ${chalk.yellow('  kaitian package')}
+    return process.cwd();
+  }
 
-    Happy hacking!
-  `);
+  @Command.Path('init')
+  async execute() {
+    try {
+      await init(this.realTargetDir);
+    } catch (err) {
+      console.error('kaitian init error:', err);
+      process.exit(1);
+    }
+  }
 }

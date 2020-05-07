@@ -1,3 +1,5 @@
+import { Command } from 'clipanion';
+
 const fs = require('fs');
 const path = require('path');
 const cp = require('child_process');
@@ -11,10 +13,10 @@ const denodeify = require('denodeify');
 const url = require('url');
 const mime = require('mime');
 const urljoin = require('url-join');
-const nlsCore = require('../../scripts/nls');
-const util = require('../../scripts/utils');
-const validation = require('../../scripts/validation');
-const npm = require('../../scripts/npm');
+const nlsCore = require('../scripts/nls');
+const util = require('../scripts/utils');
+const validation = require('../scripts/validation');
+const npm = require('../scripts/npm');
 
 const readFile = denodeify(fs.readFile);
 const unlink = denodeify(fs.unlink);
@@ -262,7 +264,7 @@ class TagsProcessor extends BaseProcessor {
     const descriptionKeywords = Object.keys(TagsProcessor.Keywords).reduce(
       (r, k) =>
         r.concat(
-          new RegExp(`\\b(?:${  escapeRegExp(k)  })(?!\\w)`, 'gi').test(
+          new RegExp(`\\b(?:${escapeRegExp(k)})(?!\\w)`, 'gi').test(
             description,
           )
             ? TagsProcessor.Keywords[k]
@@ -411,7 +413,7 @@ class MarkdownProcessor extends BaseProcessor {
             issueNumber,
           );
           result =
-            `${prefix  }[${owner}/${repositoryName}#${issueNumber}](${issueUrl})`;
+            `${prefix}[${owner}/${repositoryName}#${issueNumber}](${issueUrl})`;
         } else if (!owner && !repositoryName && issueNumber) {
           // Issue in own repository
           result =
@@ -510,7 +512,7 @@ class LicenseProcessor extends BaseProcessor {
     if (!match || !match[1]) {
       this.filter = name => /^extension\/license(\.(md|txt))?$/i.test(name);
     } else {
-      const regexp = new RegExp(`^extension/${  match[1]  }$`);
+      const regexp = new RegExp(`^extension/${match[1]}$`);
       this.filter = regexp.test.bind(regexp);
     }
     this.vsix.license = null;
@@ -850,7 +852,7 @@ function collectFiles(cwd, useYarn = false, dependencyEntryPoints, _ignoreFile) 
       ignoreFiles = Promise.resolve([]);
     }
     return (
-    // Combine with default ignore list
+      // Combine with default ignore list
       ignoreFiles
         .then(ignore => [...defaultIgnore, ...ignore, '!package.json'])
         // Split into ignore and negate list
@@ -963,7 +965,7 @@ async function prepublish(cwd, manifest, useYarn = false) {
   }
   console.warn(
     `Executing prepublish script '${
-      useYarn ? 'yarn' : 'npm'
+    useYarn ? 'yarn' : 'npm'
     } run prepublish'...`,
   );
   const { stdout, stderr } = await exec(
@@ -1006,7 +1008,7 @@ async function pack(options = {}) {
   return { manifest, packagePath, files };
 }
 exports.pack = pack;
-async function packageCommand(options = {}) {
+async function packageCmd(options = {}) {
   const { packagePath, files } = await pack(options);
   const stats = await stat(packagePath);
   let size = 0;
@@ -1022,7 +1024,7 @@ async function packageCommand(options = {}) {
     `Packaged: ${packagePath} (${files.length} files, ${size}${unit})`,
   );
 }
-exports.packageCommand = packageCommand;
+exports.packageCommand = packageCmd;
 /**
  * Lists the files included in the extension's package. Does not run prepublish.
  */
@@ -1052,3 +1054,46 @@ function ls(
     .then(files => files.forEach(f => console.log(`${f}`)));
 }
 exports.ls = ls;
+
+export class PackageCommand extends Command {
+  static usage = Command.Usage({
+    description: 'launch Kaitian IDE load specified extension',
+    details: `
+    This command helps you load extension via launching Kaitian IDE.
+    - If the \`--skipCompile\` flag is set, kaitian cli will skip run prepublish to compile.
+    - If the \`--yarn\` flag is set, kaitian cli will use yarn instead of npm.
+    - The \`--ignoreFile\` option is used to set an alternative file for .ktignore.
+    - The \`-o, --out\` option is used to specify path for .vsix extension file output.
+    `,
+  });
+
+  @Command.String('-o, --out')
+  public out!: string;
+
+  @Command.Boolean('--yarn')
+  public yarn = false;
+
+  @Command.String('--ignoreFile')
+  public ignoreFile!: string;
+
+  @Command.Boolean('--skipCompile')
+  public skipCompile = false;
+
+  @Command.String('--baseContentUrl')
+  public baseContentUrl!: string;
+
+  @Command.String('--baseImagesUrl')
+  public baseImagesUrl!: string;
+
+  @Command.Path('package')
+  async execute() {
+    await packageCmd({
+      packagePath: this.out,
+      baseContentUrl: this.baseContentUrl,
+      baseImagesUrl: this.baseImagesUrl,
+      useYarn: this.yarn,
+      ignoreFile: this.ignoreFile,
+      skipCompile: this.skipCompile,
+    });
+  }
+}
