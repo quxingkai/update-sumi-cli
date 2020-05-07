@@ -7,6 +7,7 @@ import execa from 'execa';
 import chalk from 'chalk';
 import rimraf from 'rimraf';
 import ora from 'ora';
+import { Command } from 'clipanion';
 
 import { safeParseJson } from '../util/json';
 import { ensureDir } from '../util/fs';
@@ -49,7 +50,7 @@ export function whenReady(target: any, propertyKey: string, desc: PropertyDescri
   };
 }
 
-export class EngineModule {
+class EngineModule {
   protected ready: Promise<any>;
 
   private readonly ymlConfig: YmlConfiguration;
@@ -288,5 +289,82 @@ export class EngineModule {
     }));
     const engineVersionList = fileNameList.filter(n => !!n);
     return engineVersionList;
+  }
+}
+
+export const engineModule = new EngineModule();
+
+export class EngineLsCommand extends Command {
+  static usage = Command.Usage({
+    description: 'list installed engine versions',
+  });
+
+  @Command.Path('engine', 'ls')
+  async execute() {
+    engineModule.list();
+  }
+}
+
+export class EngineLsRemoteCommand extends Command {
+  static usage = Command.Usage({
+    description: 'list remote engine versions available for install',
+  });
+
+  @Command.Path('engine', 'ls-remote')
+  async execute() {
+    engineModule.listRemote();
+  }
+}
+
+export class EngineCurrentCommand extends Command {
+  static usage = Command.Usage({
+    description: 'display currently selected version',
+  });
+
+  @Command.Path('engine', 'current')
+  async execute() {
+    console.log(engineModule.current);
+  }
+}
+
+export class EngineUseCommand extends Command {
+  static usage = Command.Usage({
+    description: 'Change current engine to [version]',
+  });
+
+  @Command.String({ required: true })
+  public version!: string;
+
+  @Command.Path('engine', 'use')
+  async execute() {
+    engineModule.use(this.version);
+  }
+}
+
+export class EngineInstallCommand extends Command {
+  static usage = Command.Usage({
+    description: 'Download and install a [version]',
+  });
+
+  @Command.String()
+  public version!: string;
+
+  @Command.Path('engine', 'install')
+  async execute() {
+    await engineModule.add(this.version);
+  }
+}
+
+export class EngineUninstallCommand extends Command {
+  static usage = Command.Usage({
+    description: 'Remove specific [version] engine',
+  });
+
+  @Command.String()
+  public version!: string;
+
+  @Command.Path('engine', 'uninstall')
+  async execute() {
+    await engineModule.remove(this.version);
   }
 }

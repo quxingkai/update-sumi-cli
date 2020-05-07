@@ -1,4 +1,5 @@
 import { marketplaceApiAddress } from './const';
+import { Command } from 'clipanion';
 
 const fse = require('fs-extra');
 const yauzl = require('yauzl');
@@ -10,8 +11,8 @@ const request = require('request');
 const Basement = require('@alipay/basement');
 
 const { pack } = require('./package');
-const basementApi = require('../../../configs/marketplace/basement.json');
-const marketplace = require('../../../configs/marketplace/teamAk.json');
+const basementApi = require('../../marketplace/basement.json');
+const marketplace = require('../../marketplace/teamAk.json');
 
 const tmpName = denodeify(tmp.tmpName);
 
@@ -94,7 +95,7 @@ Error:
   );
 }
 
-module.exports = (packagePath, ignoreFile, skipCompile) => {
+function publish(packagePath: string, ignoreFile: string, skipCompile?: boolean) {
   let promise;
   if (packagePath) {
     promise = readManifestFromPackage(packagePath).then(manifest => ({
@@ -104,10 +105,42 @@ module.exports = (packagePath, ignoreFile, skipCompile) => {
   } else {
     const cwd = process.cwd();
     const useYarn = false;
-    promise = tmpName().then(tmpPath =>
+    promise = tmpName().then((tmpPath: string) =>
       pack({ packagePath: tmpPath, cwd, useYarn, skipCompile, ignoreFile })
     );
   }
 
   return promise.then(_publish);
-};
+}
+
+export class PublishCommand extends Command {
+  static usage = Command.Usage({
+    description: 'publish the extension',
+    details: `
+    This command helps you publish your extension via cli.
+    - The \`--file\` option is used to publish the extension package located at the specified path.
+    - The \`--ignoreFile\` option is used to set an alternative file for .ktignore.
+    - If the \`--skipCompile\` flag is set, kaitian cli will skip run prepublish to compile.
+    `,
+    examples: [
+      [
+        'Examples:',
+        'kaitian publish --file=./my-extension-1.0.0.zip.'
+      ],
+    ],
+  });
+
+  @Command.String('--file')
+  public file!: string;
+
+  @Command.Boolean('--skipCompile')
+  public skipCompile = false;
+
+  @Command.String('--ignoreFile')
+  public ignoreFile!: string;
+
+  @Command.Path('publish')
+  async execute() {
+    await publish(this.file, this.ignoreFile, this.skipCompile);
+  }
+}

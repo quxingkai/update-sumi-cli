@@ -112,10 +112,10 @@ let LogMessageType;
   LogMessageType[(LogMessageType['ERROR'] = 3)] = 'ERROR';
 })(LogMessageType || (LogMessageType = {}));
 const LogPrefix = {
-  [LogMessageType.DONE]: chalk.default.bgGreen.black(' DONE '),
-  [LogMessageType.INFO]: chalk.default.bgBlueBright.black(' INFO '),
-  [LogMessageType.WARNING]: chalk.default.bgYellow.black(' WARNING '),
-  [LogMessageType.ERROR]: chalk.default.bgRed.black(' ERROR '),
+  [LogMessageType.DONE]: chalk.bgGreen.black(' DONE '),
+  [LogMessageType.INFO]: chalk.bgBlueBright.black(' INFO '),
+  [LogMessageType.WARNING]: chalk.bgYellow.black(' WARNING '),
+  [LogMessageType.ERROR]: chalk.bgRed.black(' ERROR '),
 };
 function _log(type, msg, ...args) {
   args = [LogPrefix[type], msg, ...args];
