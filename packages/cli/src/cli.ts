@@ -4,7 +4,7 @@ import semver from 'semver';
 
 import { InitCommand } from './command/init';
 import { WatchCommand, CompileCommand } from './command/bundle';
-import { EngineUninstallCommand, EngineLsCommand, EngineLsRemoteCommand, EngineCurrentCommand, EngineUseCommand, EngineInstallCommand } from './command/engine';
+import { EngineUninstallCommand, EngineLsCommand, EngineLsRemoteCommand, EngineCurrentCommand, EngineUseCommand, EngineInstallCommand, engineModule } from './command/engine';
 import { DevCommand } from './command/dev';
 import { PackageCommand } from './command/package';
 import { InstallCommand, UpdateCommand } from './command/install';
@@ -18,7 +18,7 @@ const pkg = require('../package.json');
 (async () => {
   // check node version
   checkNodeVersion();
-  prepareJobs();
+  preJobs();
 })();
 
 const cli = new Cli({
@@ -48,9 +48,7 @@ const cli = new Cli({
   cli.register(command);
 });
 
-cli.runExit(process.argv.slice(2), {
-  ...Cli.defaultContext,
-});
+cli.runExit(process.argv.slice(2), Cli.defaultContext);
 
 function checkNodeVersion() {
   if (!semver.satisfies(process.version, pkg.engines.node)) {
@@ -65,6 +63,6 @@ function checkNodeVersion() {
   }
 }
 
-function prepareJobs() {
+function preJobs() {
   ensureDirSync(kaitianInfraDir);
 }

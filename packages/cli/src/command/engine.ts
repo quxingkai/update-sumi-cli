@@ -184,6 +184,39 @@ class EngineModule {
     await this.ymlConfig.writeYml({ current: version });
   }
 
+  // memoized for 5s
+  public async getInstalledEngines() {
+    await ensureDir(kaitianInfraDir);
+    await ensureDir(engineDir);
+    const files = await fsPromise.readdir(engineDir);
+    const fileNameList = await Promise.all(files.map(async (fileName) => {
+      const filePath = path.join(engineDir, fileName);
+      const stat = await fsPromise.stat(filePath);
+      return stat.isDirectory() ? fileName : '';
+    }));
+    const engineVersionList = fileNameList.filter(n => !!n);
+    return engineVersionList;
+  }
+
+  public async getTaggedVersions() {
+    const { stdout } = await execa(npmClient, ['dist-tag', 'ls', enginePkgName]);
+    const result = stdout
+      .split('\n')
+      .reduce((prev, cur) => {
+        if (cur.length) {
+          const [ distTagStr, versionStr] = cur.split(':');
+          const distTag = distTagStr.trim();
+          const version = versionStr.trim();
+          prev[distTag] = version;
+        }
+        return prev;
+      }, {} as {
+        [key: string]: string;
+      });
+
+    return result;
+  }
+
   private async getCurrent() {
     const config = await this.ymlConfig.readYml();
     return config.current;
@@ -228,25 +261,6 @@ class EngineModule {
     return undefined;
   }
 
-  private async getTaggedVersions() {
-    const { stdout } = await execa(npmClient, ['dist-tag', 'ls', enginePkgName]);
-    const result = stdout
-      .split('\n')
-      .reduce((prev, cur) => {
-        if (cur.length) {
-          const [ distTagStr, versionStr] = cur.split(':');
-          const distTag = distTagStr.trim();
-          const version = versionStr.trim();
-          prev[distTag] = version;
-        }
-        return prev;
-      }, {} as {
-        [key: string]: string;
-      });
-
-    return result;
-  }
-
   private checkValidVersionStr(version?: string): string {
     // empty checking
     if (!version) {
@@ -275,20 +289,6 @@ class EngineModule {
     }
 
     return version;
-  }
-
-  // memoized for 5s
-  private async getInstalledEngines() {
-    await ensureDir(kaitianInfraDir);
-    await ensureDir(engineDir);
-    const files = await fsPromise.readdir(engineDir);
-    const fileNameList = await Promise.all(files.map(async (fileName) => {
-      const filePath = path.join(engineDir, fileName);
-      const stat = await fsPromise.stat(filePath);
-      return stat.isDirectory() ? fileName : '';
-    }));
-    const engineVersionList = fileNameList.filter(n => !!n);
-    return engineVersionList;
   }
 }
 
@@ -337,7 +337,12 @@ export class EngineUseCommand extends Command {
 
   @Command.Path('engine', 'use')
   async execute() {
-    engineModule.use(this.version);
+    const engineList = await engineModule.getInstalledEngines();
+    if (!engineList.length) {
+      engineModule.add(this.version);
+    } else {
+      engineModule.use(this.version);
+    }
   }
 }
 
@@ -350,6 +355,7 @@ export class EngineInstallCommand extends Command {
   public version!: string;
 
   @Command.Path('engine', 'install')
+  @Command.Path('engine', 'add')
   async execute() {
     await engineModule.add(this.version);
   }
@@ -364,6 +370,7 @@ export class EngineUninstallCommand extends Command {
   public version!: string;
 
   @Command.Path('engine', 'uninstall')
+  @Command.Path('engine', 'remove')
   async execute() {
     await engineModule.remove(this.version);
   }
