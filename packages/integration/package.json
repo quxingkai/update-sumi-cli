@@ -1,6 +1,6 @@
 {
   "name": "@ali/kaitian-integration",
-  "version": "1.0.0-alpha.14",
+  "version": "1.0.0-alpha.16",
   "description": "A simple CLI for kaitian.",
   "main": "",
   "files": [
@@ -24,7 +24,8 @@
     "build:ext-worker-host:watch": "npm run build:ext-worker-host -- --watch",
     "build1": "npm run build:node && npm run build:browser && npm run build:exthost && npm run build:webview && npm run build:ext-worker-host",
     "build": "run-p build:node build:browser build:exthost build:webview build:ext-worker-host",
-    "watch": "run-p watch:node watch:browser watch:exthost watch:webview watch:ext-worker-host"
+    "watch": "run-p watch:node watch:browser watch:exthost watch:webview watch:ext-worker-host",
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {
     "@ali/common-di": "^5.0.0",

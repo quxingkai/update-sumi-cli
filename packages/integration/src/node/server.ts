@@ -43,6 +43,7 @@ interface ServerParams {
   isDev: boolean;
   workspaceDir?: string;
   extensionCandidate?: string[];
+  extHostPath?: string;
 }
 
 async function readPkgUp() {
@@ -62,6 +63,7 @@ export async function startServer(serverParams: ServerParams, ideServerParams: I
     workspaceDir = __dirname,
     extensionCandidate = [__dirname],
     isDev,
+    extHostPath,
   } = serverParams;
   console.log(extensionCandidate);
 
@@ -89,7 +91,7 @@ export async function startServer(serverParams: ServerParams, ideServerParams: I
       masterKey: 'FWPUOR6NAH3mntLqKtNOvqKt',
       extensionDir: path.join(DEV_PATH, 'extensions')
     },
-    extHost: path.join(__dirname, '../../hosted/ext.process.js'),
+    extHost: extHostPath || path.join(__dirname, '../hosted/ext.process.js'),
     logDir: path.join(DEV_PATH, 'logs'),
     logLevel: LogLevel.Verbose,
     staticAllowPath: [extensionDir, ...extensionCandidate]
