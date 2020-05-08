@@ -13,6 +13,7 @@ import { safeParseJson } from '../util/json';
 import { ensureDir } from '../util/fs';
 import { YmlConfiguration } from '../util/yml-config';
 import { kaitianInfraDir } from './const';
+import inquirer from 'inquirer';
 
 const { npmClient, enginePkgName } = require('./const');
 
@@ -24,7 +25,7 @@ function getEngineFolderPath(version: string) {
   return path.join(engineDir, version);
 }
 
-async function getPkgJSONFile(targetDir: string, version: string) {
+async function updatePkgJSONFile(targetDir: string, version: string) {
   const pkgJsonDesc = {
     name: '@ali/kaitian-engine',
     version,
@@ -94,8 +95,9 @@ class EngineModule {
       await fsPromise.mkdir(engineDir);
     }
 
+    const spinner = ora(`Removing engine@v${version}`).start();
     await this.installEngine(engineDir, version);
-    console.log(`Engine@v${version} was installed`);
+    spinner.succeed(`Engine@v${version} was installed`);
     if (!await this.getCurrent()) {
       await this.setCurrent(version);
     }
@@ -229,9 +231,8 @@ class EngineModule {
   }
 
   private async installEngine(targetDir: string, version: string) {
-    await getPkgJSONFile(targetDir, version);
-    await execa.command(`${npmClient} install`, { cwd: targetDir })
-      .stdout!.pipe(process.stdout);
+    await updatePkgJSONFile(targetDir, version);
+    await execa.commandSync(`${npmClient} install`, { cwd: targetDir });
   }
 
   private async init() {
@@ -288,6 +289,17 @@ class EngineModule {
       throw new Error(`${enginePkgName}@${v} is invalid`);
     }
 
+    console.log(chalk.yellow(`This version ${version} has not been installed locally`));
+    const { confirm } = await inquirer.prompt<{ confirm: boolean }>({
+      type: 'confirm',
+      name: 'confirm',
+      message: `Download engine@v${version} now?`,
+    });
+
+    if (confirm) {
+      await this.add(version);
+    }
+
     return version;
   }
 }
@@ -337,12 +349,7 @@ export class EngineUseCommand extends Command {
 
   @Command.Path('engine', 'use')
   async execute() {
-    const engineList = await engineModule.getInstalledEngines();
-    if (!engineList.length) {
-      engineModule.add(this.version);
-    } else {
-      engineModule.use(this.version);
-    }
+    await engineModule.use(this.version);
   }
 }
 
