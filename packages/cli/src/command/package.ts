@@ -26,7 +26,7 @@ const exec = denodeify(cp.exec, (err, stdout, stderr) => [
   { stdout, stderr },
 ]);
 const promiseifyGlob = denodeify(glob);
-const resourcesPath = path.join(path.dirname(__dirname), 'resources');
+const resourcesPath = path.join(path.dirname(__dirname), '..', 'resources');
 const vsixManifestTemplatePath = path.join(
   resourcesPath,
   'extension.vsixmanifest',
