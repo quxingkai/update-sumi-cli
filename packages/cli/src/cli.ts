@@ -12,7 +12,7 @@ import { PublishCommand } from './command/publish';
 import { kaitianInfraDir } from './command/const';
 
 import { ensureDirSync } from './util/fs';
-import { HelpCommand } from './command/help';
+import { HelpCommand, VersionCommand } from './command/help';
 const pkg = require('../package.json');
 
 (async () => {
@@ -43,6 +43,7 @@ const cli = new Cli({
   EngineInstallCommand,
   EngineUninstallCommand,
   HelpCommand,
+  VersionCommand,
 ].forEach((command) => {
   cli.register(command);
 });

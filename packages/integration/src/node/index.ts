@@ -8,6 +8,7 @@ const {
   workspaceDir,
   extensionCandidate,
   isDev,
+  extHostPath,
 } = argv;
 
 startServer({
@@ -15,6 +16,7 @@ startServer({
   isDev: !!isDev,
   workspaceDir: workspaceDir as string,
   extensionCandidate: extensionCandidate ? strToArray(extensionCandidate as string | string[]) : undefined,
+  extHostPath: extHostPath as string,
 }, {
   modules,
 });
