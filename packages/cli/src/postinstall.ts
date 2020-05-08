@@ -7,6 +7,7 @@ async function postinstall() {
     const taggedVersion = await engineModule.getTaggedVersions();
     const latestVersion = taggedVersion['latest'];
     engineModule.add(latestVersion);
+    engineModule.use(latestVersion);
   }
 }
 
