@@ -95,7 +95,7 @@ class EngineModule {
       await fsPromise.mkdir(engineDir);
     }
 
-    const spinner = ora(`Removing engine@v${version}`).start();
+    const spinner = ora(`Adding engine@v${version}`).start();
     await this.installEngine(engineDir, version);
     spinner.succeed(`Engine@v${version} was installed`);
     if (!await this.getCurrent()) {

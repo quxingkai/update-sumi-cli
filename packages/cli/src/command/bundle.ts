@@ -1,5 +1,6 @@
 import path from 'path';
 import fs from 'fs';
+import { promisify } from 'util';
 
 import webpack from 'webpack';
 import execa from 'execa';
@@ -13,31 +14,35 @@ import getWebpackNodeConfig from '../scripts/webpack/webpack.config.node';
 import getWorkerWebpackConfig from '../scripts/webpack/webpack.config.worker';
 
 // TODO: mode#production/development
-
 const cwd = process.cwd();
-const pkgContent = JSON.parse(
-  fs.readFileSync(path.join(cwd, 'package.json'), 'utf-8'),
-);
 
-const webpackConfigs = [
-  getBrowserWebpackConfig,
-  getWebpackNodeConfig,
-  getEntryWebpackConfig,
-  getWorkerWebpackConfig,
-]
-  .map(fn => {
-    const result = fn({ cwd, pkgContent });
-    if (result) {
-      return result.toConfig();
-    }
-  })
-  .filter(n => n);
+async function getPkgContent() {
+  const json = await promisify(fs.readFile)(path.join(cwd, 'package.json'), 'utf-8');
+  return JSON.parse(json);
+}
 
+async function getWebpackConfigs() {
+  const pkgContent = await getPkgContent();
+  return [
+    getBrowserWebpackConfig,
+    getWebpackNodeConfig,
+    getEntryWebpackConfig,
+    getWorkerWebpackConfig,
+  ]
+    .map(fn => {
+      const result = fn({ cwd, pkgContent });
+      if (result) {
+        return result.toConfig();
+      }
+    })
+    .filter(n => n);
+}
 // webpackConfigs.push(getBrowserWebpackConfig({cwd, pkgContent}));
 
 type CompilerMethod = 'run' | 'watch';
 
 async function bundle(compilerMethod: CompilerMethod) {
+  const webpackConfigs = await getWebpackConfigs();
   const webpackTasks = webpackConfigs.map(webpackConfig => {
     return async () => {
       await runTask(webpackConfig, compilerMethod);

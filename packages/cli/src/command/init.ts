@@ -16,7 +16,7 @@ const defaultTemplatePkg = '@ali/kaitian-simple-ext-template';
 
 const spinner = ora();
 
-const templateDir = path.resolve(kaitianInfraDir, 'ali-kaitian-template');
+const templateDir = path.resolve(kaitianInfraDir, 'template');
 
 async function ensurePkgJSONFile(targetDir: string) {
   if (!fs.existsSync(targetDir)) {
