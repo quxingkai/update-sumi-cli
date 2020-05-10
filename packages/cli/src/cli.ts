@@ -9,10 +9,11 @@ import { DevCommand } from './command/dev';
 import { PackageCommand } from './command/package';
 import { InstallCommand, UpdateCommand } from './command/install';
 import { PublishCommand } from './command/publish';
-import { kaitianInfraDir } from './command/const';
+import { kaitianInfraDir } from './const';
 
 import { ensureDirSync } from './util/fs';
 import { HelpCommand, VersionCommand } from './command/help';
+import { LoginCommand } from './command/login';
 const pkg = require('../package.json');
 
 (async () => {
@@ -42,6 +43,7 @@ const cli = new Cli({
   EngineUseCommand,
   EngineInstallCommand,
   EngineUninstallCommand,
+  LoginCommand,
   HelpCommand,
   VersionCommand,
 ].forEach((command) => {

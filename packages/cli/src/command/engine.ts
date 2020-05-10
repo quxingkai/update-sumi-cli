@@ -8,14 +8,13 @@ import chalk from 'chalk';
 import rimraf from 'rimraf';
 import ora from 'ora';
 import { Command } from 'clipanion';
+import inquirer from 'inquirer';
 
 import { safeParseJson } from '../util/json';
 import { ensureDir } from '../util/fs';
 import { YmlConfiguration } from '../util/yml-config';
-import { kaitianInfraDir } from './const';
-import inquirer from 'inquirer';
 
-const { npmClient, enginePkgName } = require('./const');
+import { kaitianInfraDir, npmClient, enginePkgName } from '../const';
 
 const fsPromise = fs.promises;
 

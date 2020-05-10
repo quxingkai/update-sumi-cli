@@ -1,4 +1,4 @@
-import { marketplaceApiAddress } from './const';
+import { marketplaceApiAddress } from '../const';
 import { Command } from 'clipanion';
 
 const fse = require('fs-extra');

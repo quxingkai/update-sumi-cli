@@ -8,7 +8,7 @@ import ora from 'ora';
 import execa from 'execa';
 import copy from 'kopy';
 
-import { npmClient, kaitianInfraDir } from './const';
+import { npmClient, kaitianInfraDir } from '../const';
 
 const fsPromise = fs.promises;
 
