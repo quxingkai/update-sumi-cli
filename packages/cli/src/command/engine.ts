@@ -8,14 +8,13 @@ import chalk from 'chalk';
 import rimraf from 'rimraf';
 import ora from 'ora';
 import { Command } from 'clipanion';
+import inquirer from 'inquirer';
 
 import { safeParseJson } from '../util/json';
 import { ensureDir } from '../util/fs';
-import { YmlConfiguration } from '../util/yml-config';
-import { kaitianInfraDir } from './const';
-import inquirer from 'inquirer';
 
-const { npmClient, enginePkgName } = require('./const');
+import { kaitianInfraDir, npmClient, enginePkgName } from '../const';
+import { kaitianConfiguration } from '../config';
 
 const fsPromise = fs.promises;
 
@@ -39,10 +38,6 @@ async function updatePkgJSONFile(targetDir: string, version: string) {
   await fsPromise.writeFile(pkgJSONFilePath, json, 'utf8');
 }
 
-interface EngineYml {
-  current: string;
-}
-
 export function whenReady(target: any, propertyKey: string, desc: PropertyDescriptor) {
   const origin = target[propertyKey];
   desc.value = async function(...params: any[]) {
@@ -54,10 +49,7 @@ export function whenReady(target: any, propertyKey: string, desc: PropertyDescri
 class EngineModule {
   protected ready: Promise<any>;
 
-  private readonly ymlConfig: YmlConfiguration;
-
   constructor() {
-    this.ymlConfig = new YmlConfiguration<EngineYml>(engineDir, 'engine.yml');
     this.ready = this.init();
   }
 
@@ -73,13 +65,12 @@ class EngineModule {
   }
 
   get current() {
-    const config = this.ymlConfig.readYmlSync();
-    return config.current;
+    return kaitianConfiguration.content.engine || '';
   }
 
   set current(value: string) {
-    const config = this.ymlConfig.readYmlSync();
-    this.ymlConfig.writeYmlSync({ ...config, current: value });
+    const config = kaitianConfiguration.content;
+    kaitianConfiguration.content = { ...config, engine: value };
   }
 
   @whenReady
@@ -183,7 +174,7 @@ class EngineModule {
   @whenReady
   public async use(v?: string) {
     const version = await this.checkEngineVersion(v);
-    await this.ymlConfig.writeYml({ current: version });
+    await this.setCurrent(version);
   }
 
   // memoized for 5s
@@ -220,13 +211,11 @@ class EngineModule {
   }
 
   private async getCurrent() {
-    const config = await this.ymlConfig.readYml();
-    return config.current;
+    return await kaitianConfiguration.getEngineVersion() || '';
   }
 
   private async setCurrent(value: string) {
-    const config = await this.ymlConfig.readYml();
-    await this.ymlConfig.writeYml({ ...config, current: value });
+    await kaitianConfiguration.updateContent({ engine: value });
     console.log(`Set v${value} as the current engine`);
   }
 
@@ -242,11 +231,11 @@ class EngineModule {
       // console.warn('Please exec `kaitian cli install`');
     }
 
-    const config = await this.ymlConfig.readYml();
-    if (!config.current || !engineList.includes(config.current)) {
+    const config = await kaitianConfiguration.getContent();
+    if (!config.engine || !engineList.includes(config.engine)) {
       // fallback to the first in engineList
       const current = engineList[0];
-      await this.ymlConfig.writeYml({ ...config, current });
+      await kaitianConfiguration.replaceContent({ ...config, engine: current });
       // console.warn(`We are using engine@v${current }`);
     }
   }

@@ -1,10 +1,5 @@
-import path from 'path';
-import fs from 'fs';
-import { promisify } from 'util';
-
-import webpack from 'webpack';
-import execa from 'execa';
 import { Command } from 'clipanion';
+import webpack from 'webpack';
 import formatWebpackMessages from 'react-dev-utils/formatWebpackMessages';
 
 import parallelRunPromise from '../scripts/parallel-run-promise';
@@ -13,16 +8,11 @@ import getBrowserWebpackConfig from '../scripts/webpack/webpack.config.browser';
 import getWebpackNodeConfig from '../scripts/webpack/webpack.config.node';
 import getWorkerWebpackConfig from '../scripts/webpack/webpack.config.worker';
 
+import { getExtPkgContent } from '../util/extension';
+
 // TODO: mode#production/development
-const cwd = process.cwd();
-
-async function getPkgContent() {
-  const json = await promisify(fs.readFile)(path.join(cwd, 'package.json'), 'utf-8');
-  return JSON.parse(json);
-}
-
 async function getWebpackConfigs() {
-  const pkgContent = await getPkgContent();
+  const pkgContent = await getExtPkgContent();
   return [
     getBrowserWebpackConfig,
     getWebpackNodeConfig,
@@ -30,7 +20,7 @@ async function getWebpackConfigs() {
     getWorkerWebpackConfig,
   ]
     .map(fn => {
-      const result = fn({ cwd, pkgContent });
+      const result = fn({ cwd: process.cwd(), pkgContent });
       if (result) {
         return result.toConfig();
       }

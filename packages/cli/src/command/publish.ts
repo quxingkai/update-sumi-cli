@@ -1,5 +1,7 @@
-import { marketplaceApiAddress } from './const';
+import { marketplaceApiAddress } from '../const';
 import { Command } from 'clipanion';
+import { kaitianConfiguration, ITeamAccount } from '../config';
+import { getExtPkgContent } from '../util/extension';
 
 const fse = require('fs-extra');
 const yauzl = require('yauzl');
@@ -12,7 +14,6 @@ const Basement = require('@alipay/basement');
 
 const { pack } = require('./package');
 const basementApi = require('../../marketplace/basement.json');
-const marketplace = require('../../marketplace/teamAk.json');
 
 const tmpName = denodeify(tmp.tmpName);
 
@@ -67,14 +68,30 @@ async function _publish(options) {
   console.log(chalk.green(`Upload ${name} to OSS...`));
 
   const { url } = await file.upload(name, packageStream, { mode: 'internal' });
+  const pkgContent = await getExtPkgContent();
+
+  let teamAccount: ITeamAccount | undefined = undefined;
+  if (process.env.KT_EXT_ACCOUNT_ID && process.env.KT_EXT_MASTER_KEY) {
+    teamAccount = {
+      accountId: process.env.KT_EXT_ACCOUNT_ID,
+      masterKey: process.env.KT_EXT_MASTER_KEY,
+    }
+  } else {
+    teamAccount = await kaitianConfiguration.getTeamAccount(pkgContent.publisher);
+  }
+
+  if (!teamAccount) {
+    console.log(chalk.red(`Please login for publisher:${pkgContent.publisher} firstly`));
+    return;
+  }
 
   request.post(
     `${marketplaceApiAddress}/extension/upload?name=${manifest.name}&url=${url}`,
     {
       method: 'POST',
       headers: {
-        'x-account-id': marketplace.teamAccount,
-        'x-master-key': marketplace.teamKey,
+        'x-account-id': teamAccount.accountId,
+        'x-master-key': teamAccount.masterKey,
       },
     },
     (err, res) => {

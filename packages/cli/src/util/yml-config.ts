@@ -10,19 +10,29 @@ export class YmlConfiguration<T = any> {
   constructor(
     private readonly rootDir: string,
     private readonly ymlFileName: string,
-  ) {}
+    defaultValue?: Partial<T>,
+  ) {
+    ensureDirSync(this.rootDir);
+    const content = fs.readFileSync(this.ymlPath, 'utf8');
+    if (!content && defaultValue) {
+      this.writeYmlSync(defaultValue);
+    }
+  }
+
+  private get ymlPath() {
+    return path.join(this.rootDir, this.ymlFileName);
+  }
 
   public readYmlSync(): T {
     ensureDirSync(this.rootDir);
-    const ymlPath = path.join(this.rootDir, this.ymlFileName);
-    ensureFileSync(ymlPath);
-    const ymlContent = fs.readFileSync(ymlPath, { encoding: 'utf8' });
+    ensureFileSync(this.ymlPath);
+    const ymlContent = fs.readFileSync(this.ymlPath, { encoding: 'utf8' });
     return yaml.parse(ymlContent) || {};
   }
 
   public async readYml(): Promise<T> {
     await ensureDir(this.rootDir);
-    const ymlPath = path.join(this.rootDir, this.ymlFileName);
+    const ymlPath = this.ymlPath;
     ensureFileSync(ymlPath);
     const ymlContent = await fsPromise.readFile(ymlPath, 'utf8');
     return yaml.parse(ymlContent) || {};
@@ -30,7 +40,7 @@ export class YmlConfiguration<T = any> {
 
   public writeYmlSync(content: Partial<T>): void {
     ensureDirSync(this.rootDir);
-    const ymlPath = path.join(this.rootDir, this.ymlFileName);
+    const ymlPath = this.ymlPath;
     fs.openSync(ymlPath, 'w');
     const ymlContent = fs.readFileSync(ymlPath, 'utf8');
     return fs.writeFileSync(
@@ -42,7 +52,7 @@ export class YmlConfiguration<T = any> {
 
   public async writeYml(content: Partial<T>): Promise<void> {
     await ensureDir(this.rootDir);
-    const ymlPath = path.join(this.rootDir, this.ymlFileName);
+    const ymlPath = this.ymlPath;
     await fsPromise.open(ymlPath, 'w');
     const ymlContent = await fsPromise.readFile(ymlPath, 'utf8');
     return await fsPromise.writeFile(

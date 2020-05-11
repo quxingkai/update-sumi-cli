@@ -8,8 +8,6 @@ const yazl = require('yazl');
 const glob = require('glob');
 const minimatch = require('minimatch');
 const denodeify = require('denodeify');
-// import * as markdownit from 'markdown-it';
-// import * as cheerio from 'cheerio';
 const url = require('url');
 const mime = require('mime');
 const urljoin = require('url-join');
