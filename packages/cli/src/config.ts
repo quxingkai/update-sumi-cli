@@ -48,6 +48,11 @@ class Config {
     const content = await this.getContent();
     return content.teamAccounts[publisher];
   }
+
+  public async getEngineVersion(): Promise<string | undefined> {
+    const content = await this.getContent();
+    return content.engine;
+  }
 }
 
 export const kaitianConfiguration = new Config();
