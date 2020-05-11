@@ -32,7 +32,7 @@ export class LoginCommand extends Command {
     const config = await kaitianConfiguration.getContent();
 
     const ifExistedTeamAccount = config.teamAccounts['publisher'];
-    if (ifExistedTeamAccount && ifExistedTeamAccount.teamAccount && ifExistedTeamAccount.teamKey) {
+    if (ifExistedTeamAccount && ifExistedTeamAccount.accountId && ifExistedTeamAccount.masterKey) {
       this.context.stdout.write(chalk.green(`Publisher:${publisher} is logged already`));
       return;
     }
@@ -40,17 +40,17 @@ export class LoginCommand extends Command {
     this.context.stdout.write(chalk.blue(`Login for publisher:${publisher} ->`));
 
     const answers = await inquirer.prompt<{
-      teamAccount: string;
-      teamKey: string;
+      accountId: string;
+      masterKey: string;
     }>([
       {
         type: 'input',
-        name: 'teamAccount',
+        name: 'accountId',
         message: `Please input the 'teamAccount' for publisher:${publisher}`,
       },
       {
         type: 'input',
-        name: 'teamKey',
+        name: 'masterKey',
         message: `Please input the 'teamKey' for publisher:${publisher}`,
       },
     ]);

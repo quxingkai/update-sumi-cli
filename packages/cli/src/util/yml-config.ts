@@ -10,10 +10,11 @@ export class YmlConfiguration<T = any> {
   constructor(
     private readonly rootDir: string,
     private readonly ymlFileName: string,
-    defaultValue: Partial<T>,
+    defaultValue?: Partial<T>,
   ) {
     ensureDirSync(this.rootDir);
-    if (defaultValue) {
+    const content = fs.readFileSync(this.ymlPath, 'utf8');
+    if (!content && defaultValue) {
       this.writeYmlSync(defaultValue);
     }
   }
