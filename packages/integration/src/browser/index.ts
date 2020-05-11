@@ -1,9 +1,10 @@
 import '@ali/ide-i18n/lib/browser';
 import { CommonBrowserModules } from '@ali/ide-startup/lib/browser/common-modules';
-import { BrowserModule, ConstructorOf, SlotLocation } from '@ali/ide-core-browser';
+import { BrowserModule, ConstructorOf, SlotLocation, IClientAppOpts } from '@ali/ide-core-browser';
 import { ExpressFileServerModule } from '@ali/ide-express-file-server/lib/browser';
 import '@ali/ide-core-browser/lib/style/index.less';
-import '@ali/ide-core-browser/lib/style/icon.less';
+// 只有本地 ide 需要引入该文件
+// import '@ali/ide-core-browser/lib/style/icon.less';
 
 import { renderApp } from './app';
 
@@ -39,13 +40,17 @@ const layoutConfig = {
   },
 };
 
+const customClientOpts = ((window as any).KAITIAN_CLIENT_OPTS || {}) as IClientAppOpts;
+
 renderApp({
   layoutConfig,
   useCdnIcon: false,
   modules,
+  ...customClientOpts,
   defaultPreferences: {
     'application.confirmExit': 'never',
     'general.theme': 'ide-dark',
-    'general.icon': 'vscode-icons'
-  }
+    'general.icon': 'vscode-icons',
+    ...customClientOpts.defaultPreferences,
+  },
 });

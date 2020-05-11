@@ -24,7 +24,7 @@ export async function renderApp(opts: IClientAppOpts) {
   opts.workspaceDir = (window as any).KAITIAN_SDK_CONFIG.ideWorkspaceDir;
   opts.coreExtensionDir = (window as any).KAITIAN_SDK_CONFIG.extensionDir;
   opts.extensionDir = (window as any).KAITIAN_SDK_CONFIG.extensionDir;
-  
+
   opts.wsPath = guessedConfig.wsPath || (window as any).KAITIAN_SDK_CONFIG.wsPath;
   opts.staticServicePath = guessedConfig.staticServicePath || (window as any).KAITIAN_SDK_CONFIG.staticServicePath;
   opts.webviewEndpoint = guessedConfig.webviewEndpoint || (window as any).KAITIAN_SDK_CONFIG.webviewEndpoint;
@@ -34,7 +34,7 @@ export async function renderApp(opts: IClientAppOpts) {
   opts.injector = injector;
   const app = new ClientApp(opts);
 
-  console.log(opts, 'opts');
+  console.log(opts, 'clientAppOpts');
 
   await app.start(document.getElementById('main')!, 'web');
 }
