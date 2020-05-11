@@ -9,7 +9,7 @@ import cors from '@koa/cors';
 import ejs from 'ejs';
 import { Deferred, LogLevel } from '@ali/ide-core-common';
 import { IServerAppOpts, ServerApp, NodeModule } from '@ali/ide-core-node';
-import { ConstructorOf } from '@ali/common-di';
+import { IClientAppOpts } from '@ali/ide-core-browser';
 
 import * as env from './env';
 import { openBrowser } from './openBrowser';
@@ -34,8 +34,8 @@ const deviceIp = env.CLIENT_IP;
 const extensionDir = path.join(DEV_PATH, 'extensions');
 
 interface IDEServerParams {
-  modules?: ConstructorOf<NodeModule>[];
-  options?: Partial<IServerAppOpts>;
+  serverAppOpts?: Partial<IServerAppOpts>;
+  clientAppOpts?: Partial<IClientAppOpts>;
 }
 
 interface ServerParams {
@@ -57,7 +57,7 @@ async function readPkgUp() {
   return {};
 }
 
-export async function startServer(serverParams: ServerParams, ideServerParams: IDEServerParams) {
+export async function startServer(serverParams: ServerParams, ideAppOpts: IDEServerParams) {
   const {
     port = 50999,
     workspaceDir = __dirname,
@@ -87,6 +87,7 @@ export async function startServer(serverParams: ServerParams, ideServerParams: I
     use: app.use.bind(app),
     marketplace: {
       showBuiltinExtensions: true,
+      // FIXME: @伊北 @柳千
       accountId: 'Eb0Ejh96qukCy_NzKNxztjzY',
       masterKey: 'FWPUOR6NAH3mntLqKtNOvqKt',
       extensionDir: path.join(DEV_PATH, 'extensions')
@@ -97,17 +98,10 @@ export async function startServer(serverParams: ServerParams, ideServerParams: I
     staticAllowPath: [extensionDir, ...extensionCandidate]
   };
 
-  if (Array.isArray(ideServerParams.modules)) {
+  if (ideAppOpts.serverAppOpts) {
     opts = {
       ...opts,
-      modules: ideServerParams.modules,
-    };
-  }
-
-  if (ideServerParams.options) {
-    opts = {
-      ...opts,
-      ...ideServerParams.options,
+      ...ideAppOpts.serverAppOpts,
     };
   }
 
@@ -164,6 +158,7 @@ export async function startServer(serverParams: ServerParams, ideServerParams: I
           config,
           meta,
           assets: JSON.parse(assets),
+          clientAppOpts: ideAppOpts.clientAppOpts || {},
         });
       }
       ctx.set('Content-Type', contentType);
