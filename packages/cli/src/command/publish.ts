@@ -1,5 +1,7 @@
 import { marketplaceApiAddress } from '../const';
 import { Command } from 'clipanion';
+import { kaitianConfiguration } from '../config';
+import { getExtPkgContent } from '../util/extension';
 
 const fse = require('fs-extra');
 const yauzl = require('yauzl');
@@ -68,13 +70,22 @@ async function _publish(options) {
 
   const { url } = await file.upload(name, packageStream, { mode: 'internal' });
 
+  // TODO: read teamAccount from process.env
+  const pkgContent = await getExtPkgContent();
+  const teamAccount = await kaitianConfiguration.getTeamAccount(pkgContent.publisher);
+
+  if (!teamAccount) {
+    console.log(chalk.red(`Please login for publisher:${pkgContent.publisher} firstly`));
+    return;
+  }
+
   request.post(
     `${marketplaceApiAddress}/extension/upload?name=${manifest.name}&url=${url}`,
     {
       method: 'POST',
       headers: {
-        'x-account-id': marketplace.teamAccount,
-        'x-master-key': marketplace.teamKey,
+        'x-account-id': teamAccount.accountId,
+        'x-master-key': teamAccount.masterKey,
       },
     },
     (err, res) => {

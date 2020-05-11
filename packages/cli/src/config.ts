@@ -2,8 +2,8 @@ import { YmlConfiguration } from './util/yml-config';
 import { kaitianInfraDir } from './const';
 
 export interface ITeamAccount {
-  teamAccount: string;
-  teamKey: string;
+  accountId: string;
+  masterKey: string;
 }
 
 export interface IConfig {
@@ -42,6 +42,11 @@ class Config {
 
   public async replaceContent(data: IConfig) {
     return await this.configYml.writeYml(data);
+  }
+
+  public async getTeamAccount(publisher: string): Promise<ITeamAccount | undefined> {
+    const content = await this.getContent();
+    return content.teamAccounts[publisher];
   }
 }
 
