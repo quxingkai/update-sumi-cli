@@ -1,10 +1,9 @@
 import { ComponentA } from "./component-a";
 import { ComponentB } from "./component-b";
-import * as kt from 'kaitian-browser';    // kaitian browser API
+import * as kt from "kaitian-browser";    // kaitian browser API
 
 export default {
   left: {
-    type: "add",
     component: [
       {
         id: "componentA",
@@ -14,7 +13,6 @@ export default {
     ]
   },
   right: {
-    type: "add",
     component: [
       {
         id: "componentB",
@@ -23,4 +21,4 @@ export default {
       }
     ]
   }
-};
+} as kt.IKaitianBrowserConfig;

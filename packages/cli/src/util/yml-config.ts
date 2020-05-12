@@ -13,9 +13,13 @@ export class YmlConfiguration<T = any> {
     defaultValue?: Partial<T>,
   ) {
     ensureDirSync(this.rootDir);
-    const content = fs.readFileSync(this.ymlPath, 'utf8');
-    if (!content && defaultValue) {
-      this.writeYmlSync(defaultValue);
+    if (!fs.existsSync(this.ymlPath)) {
+      this.writeYmlSync(defaultValue || '');
+    } else {
+      const content = fs.readFileSync(this.ymlPath, 'utf8');
+      if (!content && defaultValue) {
+        this.writeYmlSync(defaultValue);
+      }
     }
   }
 
@@ -38,9 +42,10 @@ export class YmlConfiguration<T = any> {
     return yaml.parse(ymlContent) || {};
   }
 
-  public writeYmlSync(content: Partial<T>): void {
+  public writeYmlSync(content: Partial<T> | ''): void {
     ensureDirSync(this.rootDir);
     const ymlPath = this.ymlPath;
+    // real need this?
     fs.openSync(ymlPath, 'w');
     const ymlContent = fs.readFileSync(ymlPath, 'utf8');
     return fs.writeFileSync(
