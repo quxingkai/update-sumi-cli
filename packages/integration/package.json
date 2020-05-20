@@ -1,6 +1,6 @@
 {
   "name": "@ali/kaitian-integration",
-  "version": "1.0.0-alpha.20",
+  "version": "1.0.0-alpha.23",
   "description": "A simple CLI for kaitian.",
   "main": "",
   "files": [
@@ -29,13 +29,13 @@
   },
   "dependencies": {
     "@ali/common-di": "^5.0.0",
-    "@ali/ide-core-browser": "1.8.15",
-    "@ali/ide-core-common": "1.8.15",
-    "@ali/ide-core-node": "1.8.15",
-    "@ali/ide-express-file-server": "1.8.15",
-    "@ali/ide-i18n": "1.8.15",
-    "@ali/ide-kaitian-extension": "1.8.15",
-    "@ali/ide-startup": "1.8.15",
+    "@ali/ide-core-browser": "1.8.20",
+    "@ali/ide-core-common": "1.8.20",
+    "@ali/ide-core-node": "1.8.20",
+    "@ali/ide-express-file-server": "1.8.20",
+    "@ali/ide-i18n": "1.8.20",
+    "@ali/ide-kaitian-extension": "1.8.20",
+    "@ali/ide-startup": "1.8.20",
     "@koa/cors": "^3.0.0",
     "chalk": "^4.0.0",
     "ejs": "^2.7.4",

@@ -354,6 +354,7 @@ export class EngineInstallCommand extends Command {
   @Command.Path('engine', 'add')
   async execute() {
     await engineModule.add(this.version);
+    await engineModule.use(this.version);
   }
 }
 
