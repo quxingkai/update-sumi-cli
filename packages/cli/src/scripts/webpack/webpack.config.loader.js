@@ -30,22 +30,26 @@ module.exports = config => {
     .end()
     .use('css-loader')
     .loader(require.resolve('css-loader'))
+    .options({
+      importLoaders: 1,
+    })
     .end()
     .use('less-loader')
     .loader(require.resolve('less-loader'))
     .options({ javascriptEnabled: true })
     .end();
 
-  const cssModuleRule = config.module
+  const lessModuleRule = config.module
     .rule('less.module')
     .test(/\.module.less$/);
-  cssModuleRule
+  lessModuleRule
     .use('style-loader')
     .loader(require.resolve('style-loader'))
     .end()
     .use('css-loader')
     .loader(require.resolve('css-loader'))
     .options({
+      importLoaders: 1,
       sourceMap: false,
       modules: {
         localIdentName: '[local]___[hash:base64:5]',
