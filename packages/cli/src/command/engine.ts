@@ -29,7 +29,7 @@ async function updatePkgJSONFile(targetDir: string, version: string) {
     name: '@ali/kaitian-engine',
     version,
     dependencies: {
-      '@ali/kaitian-integration': version,
+      '@ali/kaitian-cli-engine': version,
     }
   };
   const json = JSON.stringify(pkgJsonDesc, null, 2);
