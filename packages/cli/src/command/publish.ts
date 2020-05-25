@@ -1,19 +1,20 @@
-import { marketplaceApiAddress } from '../const';
 import { Command } from 'clipanion';
+import path from 'path';
+import os from 'os';
+
+import { marketplaceApiAddress } from '../const';
 import { kaitianConfiguration, ITeamAccount } from '../config';
 import { getExtPkgContent } from '../util/extension';
 
-const fse = require('fs-extra');
 const yauzl = require('yauzl');
 const tmp = require('tmp');
+const formstream = require('formstream');
+
 const denodeify = require('denodeify');
 const chalk = require('chalk');
 const urllib = require('urllib');
-const request = require('request');
-const Basement = require('@alipay/basement');
 
 const { pack } = require('./package');
-const basementApi = require('../../marketplace/basement.json');
 
 const tmpName = denodeify(tmp.tmpName);
 
@@ -51,24 +52,7 @@ function readManifestFromPackage(packagePath) {
 }
 
 async function _publish(options) {
-  const { appId, masterKey, endpoint } = basementApi;
-  const { file } = new Basement({
-    appId,
-    masterKey,
-    endpoint,
-    urllib
-  });
-
   const { packagePath, manifest } = options;
-  const packageStream = fse.createReadStream(packagePath);
-  const name = `${manifest.publisher}.${manifest.name}-${manifest.version}.zip`;
-
-  console.log(chalk.green(`Publishing ${name} ...`));
-
-  console.log(chalk.green(`Upload ${name} to OSS...`));
-
-  const { url } = await file.upload(name, packageStream, { mode: 'internal' });
-  const pkgContent = await getExtPkgContent();
 
   let teamAccount: ITeamAccount | undefined = undefined;
   if (process.env.KT_EXT_ACCOUNT_ID && process.env.KT_EXT_MASTER_KEY) {
@@ -77,39 +61,42 @@ async function _publish(options) {
       masterKey: process.env.KT_EXT_MASTER_KEY,
     }
   } else {
-    teamAccount = await kaitianConfiguration.getTeamAccount(pkgContent.publisher);
+    teamAccount = await kaitianConfiguration.getTeamAccount(manifest.publisher);
   }
 
   if (!teamAccount) {
-    console.log(chalk.red(`Please login for publisher:${pkgContent.publisher} firstly`));
+    console.log(chalk.red(`Please login for publisher:${manifest.publisher} firstly`));
     return;
   }
 
-  request.post(
-    `${marketplaceApiAddress}/extension/upload?name=${manifest.name}&url=${url}`,
-    {
-      method: 'POST',
-      headers: {
-        'x-account-id': teamAccount.accountId,
-        'x-master-key': teamAccount.masterKey,
+  console.log(chalk.green(`Publishing ${manifest.name} ...`));
+  console.log(chalk.green(`Uploading ${manifest.name} to marketplace...`));
+
+  const form = formstream();
+  form.file('file', packagePath);
+  form.field('name', manifest.name);
+
+  try {
+    const { data } = await urllib.request(
+      `${marketplaceApiAddress}/extension/upload`,
+      {
+        method: 'POST',
+        dataType: 'json',
+        headers: {
+          ...form.headers(),
+          'x-account-id': teamAccount.accountId,
+          'x-master-key': teamAccount.masterKey,
+        },
+        stream: form,
       },
-    },
-    (err, res) => {
-      if (err) {
-        console.log(chalk.red(err.message));
-        return;
-      }
-      if (res.statusCode !== 200) {
-        console.log(res.body);
-        console.log(chalk.red(`
-Error:
-    ${res.body}
-`));
-        return;
-      }
-      console.log(chalk.green('Done.'));
-    },
-  );
+    );
+
+    console.log(chalk.green('extensionReleaseId: '), data.extensionReleaseId);
+
+    console.log(chalk.green('Done.'));
+  } catch (err) {
+    console.log(chalk.red(err.message));
+  }
 }
 
 function publish(packagePath: string, ignoreFile: string, skipCompile?: boolean) {
@@ -122,9 +109,12 @@ function publish(packagePath: string, ignoreFile: string, skipCompile?: boolean)
   } else {
     const cwd = process.cwd();
     const useYarn = false;
-    promise = tmpName().then((tmpPath: string) =>
-      pack({ packagePath: tmpPath, cwd, useYarn, skipCompile, ignoreFile })
-    );
+
+    promise = getExtPkgContent().then(pkg => {
+      const name = `${pkg.publisher}.${pkg.name}-${pkg.version}.zip`;
+      const packagePath = path.join(os.tmpdir(), name);
+      return pack({ packagePath, cwd, useYarn, skipCompile, ignoreFile });
+    });
   }
 
   return promise.then(_publish);
