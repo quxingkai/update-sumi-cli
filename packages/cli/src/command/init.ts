@@ -51,7 +51,7 @@ function logMsg() {
   `);
 }
 
-async function init(targetPath: string, targetTemplatePkg: string = defaultTemplatePkg) {
+async function init(targetPath: string, targetTemplatePkg: string) {
   await ensurePkgJSONFile(templateDir);
   spinner.start(`Downloading template package ${targetTemplatePkg}`);
   // TODO: fetch latest version for package and update when necessary
@@ -87,6 +87,9 @@ export class InitCommand extends Command {
     ],
   });
 
+  @Command.String('--scaffold')
+  public scaffold = defaultTemplatePkg;
+
   @Command.String({ required: false })
   public targetDir?: string;
 
@@ -97,6 +100,7 @@ export class InitCommand extends Command {
       } else if (this.targetDir.startsWith('..')) {
         return path.join(process.cwd(), this.targetDir);
       }
+      return this.targetDir;
     }
 
     return process.cwd();
@@ -105,7 +109,7 @@ export class InitCommand extends Command {
   @Command.Path('init')
   async execute() {
     try {
-      await init(this.realTargetDir);
+      await init(this.realTargetDir, this.scaffold);
     } catch (err) {
       console.error('kaitian init error:', err);
       process.exit(1);

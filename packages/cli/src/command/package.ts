@@ -1065,7 +1065,7 @@ export class PackageCommand extends Command {
     `,
   });
 
-  @Command.String('-o, --out')
+  @Command.String('-o,--out')
   public out!: string;
 
   @Command.Boolean('--yarn')

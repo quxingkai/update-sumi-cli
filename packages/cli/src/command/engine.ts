@@ -9,6 +9,7 @@ import rimraf from 'rimraf';
 import ora from 'ora';
 import { Command } from 'clipanion';
 import inquirer from 'inquirer';
+import semver from 'semver';
 
 import { safeParseJson } from '../util/json';
 import { ensureDir } from '../util/fs';
@@ -29,7 +30,7 @@ async function updatePkgJSONFile(targetDir: string, version: string) {
     name: '@ali/kaitian-engine',
     version,
     dependencies: {
-      '@ali/kaitian-integration': version,
+      [enginePkgName]: version,
     }
   };
   const json = JSON.stringify(pkgJsonDesc, null, 2);
@@ -187,7 +188,9 @@ class EngineModule {
       const stat = await fsPromise.stat(filePath);
       return stat.isDirectory() ? fileName : '';
     }));
-    const engineVersionList = fileNameList.filter(n => !!n);
+    const engineVersionList = fileNameList
+      .filter(n => !!n)
+      .sort((v1, v2) => semver.compare(v1, v2));
     return engineVersionList;
   }
 
@@ -246,7 +249,9 @@ class EngineModule {
     if (stdout.length) {
       // stdout looks like this: [ '16.12.0', '16.13.0' ]
       const versionList = safeParseJson<string[]>(stdout.replace(/\'/g, '"'));
-      return versionList;
+      if (versionList) {
+        return versionList.sort((v1, v2) => semver.compare(v1, v2));
+      }
     }
     return undefined;
   }
