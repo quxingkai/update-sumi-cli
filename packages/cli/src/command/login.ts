@@ -7,7 +7,7 @@ import chalk from 'chalk';
 
 export class LoginCommand extends Command {
   static usage = Command.Usage({
-    description: 'Remove specific [version] engine',
+    description: 'Login for publisher of current extension',
   });
 
   @Command.Path('login')
