@@ -1,6 +1,4 @@
 import { Command } from 'clipanion';
-import path from 'path';
-import os from 'os';
 
 import { marketplaceApiAddress } from '../const';
 import { kaitianConfiguration, ITeamAccount } from '../config';
@@ -111,9 +109,7 @@ function publish(packagePath: string, ignoreFile: string, skipCompile?: boolean)
     const useYarn = false;
 
     promise = getExtPkgContent().then(pkg => {
-      const name = `${pkg.publisher}.${pkg.name}-${pkg.version}.zip`;
-      const packagePath = path.join(os.tmpdir(), name);
-      return pack({ packagePath, cwd, useYarn, skipCompile, ignoreFile });
+      return pack({ cwd, useYarn, skipCompile, ignoreFile });
     });
   }
 
