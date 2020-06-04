@@ -1,4 +1,5 @@
 import { Command } from 'clipanion';
+import os from 'os';
 
 import { marketplaceApiAddress } from '../const';
 import { kaitianConfiguration, ITeamAccount } from '../config';
@@ -8,13 +9,10 @@ const yauzl = require('yauzl');
 const tmp = require('tmp');
 const formstream = require('formstream');
 
-const denodeify = require('denodeify');
 const chalk = require('chalk');
 const urllib = require('urllib');
 
 const { pack } = require('./package');
-
-const tmpName = denodeify(tmp.tmpName);
 
 function readManifestFromPackage(packagePath) {
   return new Promise((c, e) => {
@@ -109,7 +107,13 @@ function publish(packagePath: string, ignoreFile: string, skipCompile?: boolean)
     const useYarn = false;
 
     promise = getExtPkgContent().then(pkg => {
-      return pack({ cwd, useYarn, skipCompile, ignoreFile });
+      return pack({
+        cwd,
+        packagePath: os.tmpdir(),
+        useYarn,
+        skipCompile,
+        ignoreFile,
+      });
     });
   }
 
