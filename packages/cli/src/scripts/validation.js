@@ -2,7 +2,8 @@ const semver = require('semver');
 const parseSemver = require('parse-semver');
 
 // eslint-disable-next-line no-useless-escape
-const nameRegex = /^[a-z0-9][a-z0-9\-]*$/i;
+// 支持 @ali/@alipay 前缀的包，只需要首次在 marketplace 创建包名时不带前缀即可
+const nameRegex = /^(@.+\/)?[a-z0-9][a-z0-9\-]*$/i;
 function validatePublisher(publisher) {
   if (!publisher) {
     throw new Error(

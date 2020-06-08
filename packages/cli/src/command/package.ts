@@ -954,9 +954,14 @@ function writeZipFile(files, packagePath) {
         }),
     );
 }
+
 function getDefaultPackageName(manifest) {
-  return `${manifest.publisher}-${manifest.name}-${manifest.version}.zip`;
+  // remove `@private` in package.json#name
+  const name = manifest.name
+    .replace(/^@(\w+)\/(.+)/, (_: any, p1: string, p2: string) => [p1, p2].join('-'));
+  return `${manifest.publisher}-${name}-${manifest.version}.zip`;
 }
+
 async function prepublish(cwd, manifest, useYarn = false) {
   if (!manifest.scripts || !manifest.scripts['prepublish']) {
     return;

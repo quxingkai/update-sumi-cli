@@ -1,5 +1,4 @@
 import { Command } from 'clipanion';
-import path from 'path';
 import os from 'os';
 
 import { marketplaceApiAddress } from '../const';
@@ -10,13 +9,10 @@ const yauzl = require('yauzl');
 const tmp = require('tmp');
 const formstream = require('formstream');
 
-const denodeify = require('denodeify');
 const chalk = require('chalk');
 const urllib = require('urllib');
 
 const { pack } = require('./package');
-
-const tmpName = denodeify(tmp.tmpName);
 
 function readManifestFromPackage(packagePath) {
   return new Promise((c, e) => {
@@ -111,9 +107,13 @@ function publish(packagePath: string, ignoreFile: string, skipCompile?: boolean)
     const useYarn = false;
 
     promise = getExtPkgContent().then(pkg => {
-      const name = `${pkg.publisher}.${pkg.name}-${pkg.version}.zip`;
-      const packagePath = path.join(os.tmpdir(), name);
-      return pack({ packagePath, cwd, useYarn, skipCompile, ignoreFile });
+      return pack({
+        cwd,
+        packagePath: os.tmpdir(),
+        useYarn,
+        skipCompile,
+        ignoreFile,
+      });
     });
   }
 
