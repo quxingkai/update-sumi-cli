@@ -302,7 +302,7 @@ export const engineModule = new EngineModule();
 
 export class EngineLsCommand extends Command {
   static usage = Command.Usage({
-    description: 'list installed engine versions',
+    description: 'List installed engine versions',
   });
 
   @Command.Path('engine', 'ls')
@@ -313,7 +313,7 @@ export class EngineLsCommand extends Command {
 
 export class EngineLsRemoteCommand extends Command {
   static usage = Command.Usage({
-    description: 'list remote engine versions available for install',
+    description: 'List remote engine versions available for install',
   });
 
   @Command.Path('engine', 'ls-remote')
