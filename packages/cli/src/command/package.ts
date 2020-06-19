@@ -170,7 +170,7 @@ class ManifestProcessor extends BaseProcessor {
       displayName: manifest.displayName || manifest.name,
       version: manifest.version,
       publisher: manifest.publisher,
-      engine: manifest.engines.vscode,
+      engine: manifest.engines.kaitian,
       description: manifest.description || '',
       categories: (manifest.categories || []).join(','),
       flags: flags.join(' '),
@@ -661,7 +661,7 @@ function validateManifest(manifest) {
     throw new Error('Manifest missing field: engines');
   }
 
-  if (!manifest.engines['vscode']) {
+  if (!manifest.engines['kaitian']) {
     throw new Error('Manifest missing field: engines.kaitian');
   }
 
