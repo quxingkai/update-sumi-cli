@@ -43,6 +43,7 @@ module.exports = (options = {}) => {
   config.externals({
     vscode: 'vscode',
     kaitian: 'kaitian',
+    'kaitian-worker': 'kaitian-worker',
   });
 
   return config;
