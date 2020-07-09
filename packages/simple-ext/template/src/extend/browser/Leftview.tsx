@@ -2,37 +2,39 @@ import * as React from "react";
 import { useState, useEffect } from 'react';
 import { Button } from 'kaitian-browser';
 
-import { INodeService, IWorkerService } from "../common/service";
+import { INodeService } from "../common/service";
+import './style.less';
 
-const defaultTitle = "右侧面板";
+const defaultTitle = "左侧面板";
 
-export const ComponentB: React.FC<IComponentProps<INodeService, IWorkerService>> = ({
+export const Leftview: React.FC<IComponentProps<INodeService>> = ({
   kaitianExtendSet,
   kaitianExtendService,
 }) => {
   const [title, setTitle] = useState(defaultTitle);
 
-  function changeTitleHandler(val: string) {
+  function onDidUpdateTitle(val: string) {
     setTitle(defaultTitle + " " + val);
   }
+
   useEffect(() => {
     if (kaitianExtendSet) {
       kaitianExtendSet.set({
-        changeTitle: changeTitleHandler,
+        updateTitle: onDidUpdateTitle,
       });
     }
   }, []);
 
   function clickHandler() {
-    kaitianExtendService.worker.bizWorkerHello().then(msg => {
-      console.log("component b host msg", msg);
+    kaitianExtendService.node.sayHello().then(msg => {
+      console.log("Leftview receive message", msg);
     });
   }
 
   return (
-    <div>
+    <div className="kt-extension-example-container">
       <p>{title}</p>
       <Button onClick={clickHandler}>change title</Button>
     </div>
   );
-}
+};
