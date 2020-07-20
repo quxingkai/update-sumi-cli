@@ -31,7 +31,7 @@ export class LoginCommand extends Command {
 
     const config = await kaitianConfiguration.getContent();
 
-    const ifExistedTeamAccount = config.teamAccounts['publisher'];
+    const ifExistedTeamAccount = config.teamAccounts[publisher];
     if (ifExistedTeamAccount && ifExistedTeamAccount.accountId && ifExistedTeamAccount.masterKey) {
       this.context.stdout.write(chalk.green(`Publisher:${publisher} is logged already`));
       return;
