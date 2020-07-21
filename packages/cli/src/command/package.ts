@@ -1,4 +1,5 @@
 import { Command } from 'clipanion';
+import { buildWebAssetsMeta } from './../util/analysis'
 
 const fs = require('fs');
 const path = require('path');
@@ -1098,5 +1099,6 @@ export class PackageCommand extends Command {
       ignoreFile: this.ignoreFile,
       skipCompile: this.skipCompile,
     });
+    buildWebAssetsMeta()
   }
 }
