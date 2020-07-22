@@ -1091,6 +1091,7 @@ export class PackageCommand extends Command {
 
   @Command.Path('package')
   async execute() {
+    buildWebAssetsMeta();
     await packageCmd({
       packagePath: this.out,
       baseContentUrl: this.baseContentUrl,
@@ -1099,6 +1100,5 @@ export class PackageCommand extends Command {
       ignoreFile: this.ignoreFile,
       skipCompile: this.skipCompile,
     });
-    buildWebAssetsMeta()
   }
 }
