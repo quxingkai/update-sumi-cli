@@ -1,4 +1,4 @@
-import get from 'lodash.get';
+import { get, uniq, flattenDeep } from 'lodash';
 import { safeParseJson } from './json';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -16,14 +16,6 @@ const isURL = (str: string): boolean => {
   } catch {
     return false;
   }
-}
-
-const uniq = (arr: string[]): string[] => {
-  return Array.from(new Set(arr));
-}
-
-const flatten = (arr: any) => {
-  return arr.reduce((pre: any[], cur: any) => pre.concat(Array.isArray(cur) ? flatten(cur) : cur), []);
 }
 
 const touchedFiles: Set<string> = new Set();
@@ -56,7 +48,7 @@ const getAppendResource = (obj: any): string[] => {
       return pre;
     }
 
-    return flatten(pre.concat(next));
+    return flattenDeep(pre.concat(next));
   }, [])
 }
 
@@ -75,7 +67,7 @@ const analysisSingleFile = (filepath: string) => {
 
   const appendPath = getAppendResource(fileJsonObj);
 
-  const appendResource: string[] = flatten(appendPath.length === 0 ? [] : (
+  const appendResource: string[] = flattenDeep(appendPath.length === 0 ? [] : (
     appendPath.map(p => analysisSingleFile(path.resolve(dirPath, p)))
   ));
 
@@ -94,7 +86,7 @@ const analysisSingleFile = (filepath: string) => {
 
       const rawPath2AbsosultPath = (p: string) => isURL(p) ? p : path.resolve(dirPath, p);
 
-      return skip ? preResult : flatten(preResult.concat(
+      return skip ? preResult : flattenDeep(preResult.concat(
         isArrayPath
           ? (result as string[]).map((p) =>rawPath2AbsosultPath(p))
           : [rawPath2AbsosultPath(result as string)]
@@ -109,7 +101,7 @@ const replaceAbsolutePath2relative = (str: string) => {
 
 // main
 export const buildWebAssetsMeta = () => {
-  const result = uniq(flatten(ANALYSIS_ENTRY_LIST.map(filePath => analysisSingleFile(filePath))))
+  const result = uniq(flattenDeep(ANALYSIS_ENTRY_LIST.map(filePath => analysisSingleFile(filePath))))
     .map(p => replaceAbsolutePath2relative(p));
 
   const preFileContent = (() => {
