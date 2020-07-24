@@ -1,6 +1,6 @@
 import { get, uniq, flattenDeep } from 'lodash';
 import { safeParseJson } from './json';
-import { promisify } from 'util';
+import { promisify, isFunction } from 'util';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -28,10 +28,15 @@ export const ANALYSIS_ENTRY_LIST = [
 
 export const ANALYSIS_FIELD_PATH: { [key: string]: string | symbol } = ['contributes', 'kaitianContributes'].reduce((preResult, curPrefix) => ({
   ...preResult,
-  [`${curPrefix}.iconThemes`]: 'path',
-  [`${curPrefix}.iconThemes`]: 'configuration',
+  // [`${curPrefix}.iconThemes`]: 'configuration',
   [`${curPrefix}.grammars`]: 'path',
-  [`${curPrefix}.themes`]: 'path',
+  [`${curPrefix}.themes`]: (value: any) => {
+    const nextKey = 'path';
+    if (Array.isArray(value)) {
+      return value.filter(v => v[nextKey]).map(v => v[nextKey]);
+    }
+    return []
+  },
   [`${curPrefix}.snippets`]: 'path',
   [`${curPrefix}.jsonValidation`]: 'url',
   [`${curPrefix}.browserMain`]: useKeyPathDirect,
@@ -73,21 +78,29 @@ const analysisSingleFile = async (filepath: string) => {
   return appendResource.concat(Object.keys(ANALYSIS_FIELD_PATH)
     .reduce((preResult: string[], curPickPath: string) => {
 
-      const extraDesc: string | symbol = ANALYSIS_FIELD_PATH[curPickPath];
+      const extraDesc: string | symbol | Function = ANALYSIS_FIELD_PATH[curPickPath];
 
-      const isArrayPath = extraDesc !== useKeyPathDirect;
+      const isFunctionPath = isFunction(extraDesc);
+      const isArrayPath = !isFunctionPath && (extraDesc !== useKeyPathDirect);
 
-      const result: string | string[] = isArrayPath
-        ? get(fileJsonObj, curPickPath, []).filter((i: any) => i[extraDesc]).map((i: any) => i[extraDesc])
-        : get(fileJsonObj, curPickPath)
+      let result: string | string[];
+
+      if (isFunctionPath) {
+        // @ts-ignore
+        result = extraDesc(get(fileJsonObj, curPickPath))
+      } else if (isArrayPath) {
+        result = get(fileJsonObj, curPickPath, []).filter((i: any) => i[extraDesc]).map((i: any) => i[extraDesc]);
+      } else {
+        result = get(fileJsonObj, curPickPath)
+      }
 
       const skip = typeof result === 'undefined' || result.length === 0;
 
       const rawPath2AbsolutePath = (p: string) => isURL(p) ? p : path.resolve(dirPath, p);
 
       return skip ? preResult : flattenDeep(preResult.concat(
-        isArrayPath
-          ? (result as string[]).map((p) =>rawPath2AbsolutePath(p))
+        Array.isArray(result)
+          ? (result as string[]).map((p) => rawPath2AbsolutePath(p))
           : [rawPath2AbsolutePath(result as string)]
       ))
     }, []));
