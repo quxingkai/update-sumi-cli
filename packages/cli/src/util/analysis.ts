@@ -97,6 +97,30 @@ const replaceAbsolutePath2relative = (str: string) => {
   return isURL(str) ? str : path.relative(execBasePath, str);
 }
 
+export const validateMeta = async () => {
+  const metaJSON = safeParseJson(await promisify(fs.readFile)(metaFilePath, 'utf-8')) || {};
+
+  const webAssets: string[] = metaJSON["web-assets"];
+
+  const notExists: string[] = [];
+
+  for (const assetPath of webAssets) {
+    if (isURL(assetPath)) {
+      continue;
+    }
+    if (!await promisify(fs.exists)(assetPath)) {
+      notExists.push(assetPath)
+    }
+  }
+
+  if (notExists.length > 0) {
+    throw Error(`assets not exist:
+      \t${notExists.join('\n\t')}
+    `)
+  }
+  return true;
+}
+
 
 // main
 export const buildWebAssetsMeta = async () => {
