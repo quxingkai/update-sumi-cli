@@ -1091,7 +1091,7 @@ export class PackageCommand extends Command {
 
   @Command.Path('package')
   async execute() {
-    buildWebAssetsMeta();
+    await buildWebAssetsMeta();
     await packageCmd({
       packagePath: this.out,
       baseContentUrl: this.baseContentUrl,
