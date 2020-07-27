@@ -25,10 +25,33 @@ export const ANALYSIS_ENTRY_LIST = [
   'package.json',
 ].map(entry => path.resolve(execBasePath, entry));
 
+export const getIconAssetsFromIconThemeJSON = (themeDesc: any) => {
+  const nextKey = 'path';
+  if (Array.isArray(themeDesc)) {
+    return flattenDeep(themeDesc.map(iconTheme => {
+      const nextPath = iconTheme[nextKey];
+      const nextMatch = "iconPath";
+      const nextFile: string = fs.readFileSync(path.resolve(execBasePath, nextPath), 'utf-8');
+      const nextDir = path.dirname(path.resolve(execBasePath, nextPath))
+      const result = [...nextFile.matchAll(new RegExp(`"${nextMatch}":\\s*"(\\S+)"`, 'g'))].map(g => path.resolve(nextDir, g[1]))
+      return result
+    }))
+  }
+}
+
 
 export const ANALYSIS_FIELD_PATH: { [key: string]: string | symbol } = ['contributes', 'kaitianContributes'].reduce((preResult, curPrefix) => ({
   ...preResult,
-  // [`${curPrefix}.iconThemes`]: 'configuration',
+  [`${curPrefix}.iconThemes`]: getIconAssetsFromIconThemeJSON,
+  [`${curPrefix}.productIconThemes`]: getIconAssetsFromIconThemeJSON,
+  [`${curPrefix}.configuration`]: (value: any) => {
+    const nextKey = 'properties.iconPath';
+    if (Array.isArray(value)) {
+      return flattenDeep(value.map(font => {
+        return get(font, nextKey)
+      }))
+    }
+  },
   [`${curPrefix}.grammars`]: 'path',
   [`${curPrefix}.themes`]: (value: any) => {
     const nextKey = 'path';
