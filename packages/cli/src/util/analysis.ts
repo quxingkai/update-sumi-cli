@@ -40,7 +40,7 @@ export const getIconAssetsFromIconThemeJSON = (themeDesc: any) => {
 }
 
 
-export const ANALYSIS_FIELD_PATH: { [key: string]: string | symbol } = ['contributes', 'kaitianContributes'].reduce((preResult, curPrefix) => ({
+export const ANALYSIS_FIELD_PATH: { [key: string]: string | symbol | Function } = ['contributes', 'kaitianContributes'].reduce((preResult, curPrefix) => ({
   ...preResult,
   [`${curPrefix}.iconThemes`]: getIconAssetsFromIconThemeJSON,
   [`${curPrefix}.productIconThemes`]: getIconAssetsFromIconThemeJSON,
@@ -101,7 +101,7 @@ const analysisSingleFile = async (filepath: string) => {
   return appendResource.concat(Object.keys(ANALYSIS_FIELD_PATH)
     .reduce((preResult: string[], curPickPath: string) => {
 
-      const extraDesc: string | symbol | Function = ANALYSIS_FIELD_PATH[curPickPath];
+      const extraDesc = ANALYSIS_FIELD_PATH[curPickPath];
 
       const isFunctionPath = isFunction(extraDesc);
       const isArrayPath = !isFunctionPath && (extraDesc !== useKeyPathDirect);
@@ -109,10 +109,9 @@ const analysisSingleFile = async (filepath: string) => {
       let result: string | string[];
 
       if (isFunctionPath) {
-        // @ts-ignore
-        result = extraDesc(get(fileJsonObj, curPickPath))
+        result = (extraDesc as Function)(get(fileJsonObj, curPickPath))
       } else if (isArrayPath) {
-        result = get(fileJsonObj, curPickPath, []).filter((i: any) => i[extraDesc]).map((i: any) => i[extraDesc]);
+        result = get(fileJsonObj, curPickPath, []).filter((i: any) => i[extraDesc as string]).map((i: any) => i[extraDesc as string]);
       } else {
         result = get(fileJsonObj, curPickPath)
       }
