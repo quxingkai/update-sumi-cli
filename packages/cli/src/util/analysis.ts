@@ -66,20 +66,18 @@ export const ANALYSIS_FIELD_PATH: { [key: string]: string | symbol | Function } 
   [`${curPrefix}.workerMain`]: useKeyPathDirect,
 }), {})
 
-const getAppendResource = (obj: any): string[] => {
+const getAppendResource = (obj: any, dirPath: string): string[] => {
   const fields = ['include'];
   return fields.reduce((pre: string[], cur: string) => {
     const next = get(obj, cur);
-
     if (typeof next === 'undefined') {
       return pre;
     }
-
-    return flattenDeep(pre.concat(next));
+    return flattenDeep(pre.concat(path.resolve(dirPath, next)));
   }, [])
 }
 
-const analysisSingleFile = async (filepath: string) => {
+const analysisSingleFile = (filepath: string): string[] => {
 
   // 循环依赖
   if (touchedFiles.has(filepath)) {
@@ -90,13 +88,16 @@ const analysisSingleFile = async (filepath: string) => {
 
   const dirPath = path.dirname(filepath);
 
-  const fileJsonObj = safeParseJson(await promisify(fs.readFile)(filepath, 'utf-8'));
+  // 不是 json 就跳过
+  if (!filepath.includes('.json')) {
+    return []
+  }
 
-  const appendPath = getAppendResource(fileJsonObj);
+  const fileJsonObj = safeParseJson(fs.readFileSync(filepath, 'utf-8'));
 
-  const appendResource: string[] = flattenDeep(appendPath.length === 0 ? [] : await (
-    Promise.all(appendPath.map(p => analysisSingleFile(path.resolve(dirPath, p))))
-  ));
+  const appendPath = getAppendResource(fileJsonObj, dirPath);
+
+  const appendResource: string[] = appendPath.concat(flattenDeep(appendPath.length === 0 ? [] : appendPath.map(p => analysisSingleFile(path.resolve(dirPath, p)))));
 
   return appendResource.concat(Object.keys(ANALYSIS_FIELD_PATH)
     .reduce((preResult: string[], curPickPath: string) => {
@@ -110,6 +111,7 @@ const analysisSingleFile = async (filepath: string) => {
 
       if (isFunctionPath) {
         result = (extraDesc as Function)(get(fileJsonObj, curPickPath))
+        result = Array.isArray(result) ? result.concat(flattenDeep(result.map((file: string) => analysisSingleFile(file)))) : result
       } else if (isArrayPath) {
         result = get(fileJsonObj, curPickPath, []).filter((i: any) => i[extraDesc as string]).map((i: any) => i[extraDesc as string]);
       } else {
