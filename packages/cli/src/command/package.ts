@@ -1,4 +1,5 @@
 import { Command } from 'clipanion';
+import { buildWebAssetsMeta, validateMeta } from './../util/analysis'
 
 const fs = require('fs');
 const path = require('path');
@@ -1000,6 +1001,8 @@ async function pack(options = {}) {
     await prepublish(cwd, manifest, options.useYarn);
   }
   const files = await collect(manifest, options);
+  await buildWebAssetsMeta();
+  await validateMeta();
   const jsFiles = files.filter(f => /\.js$/i.test(f.path));
   if (files.length > 5000 || jsFiles.length > 100) {
     console.log(
