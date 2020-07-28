@@ -88,6 +88,11 @@ const analysisSingleFile = (filepath: string): string[] => {
 
   const dirPath = path.dirname(filepath);
 
+  // 不是 json 就跳过
+  if (!filepath.includes('.json')) {
+    return []
+  }
+
   const fileJsonObj = safeParseJson(fs.readFileSync(filepath, 'utf-8'));
 
   const appendPath = getAppendResource(fileJsonObj, dirPath);
