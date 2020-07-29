@@ -181,5 +181,7 @@ export const buildWebAssetsMeta = async () => {
 
 
 export const rmMeta = async () => {
-  await promisify(fs.unlink)(metaFilePath)
+  if(await promisify(fs.exists)(metaFilePath)) {
+    await promisify(fs.unlink)(metaFilePath)
+  }
 }

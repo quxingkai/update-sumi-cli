@@ -995,24 +995,31 @@ async function getPackagePath(cwd, manifest, options = {}) {
   }
 }
 async function pack(options = {}) {
-  const cwd = options.cwd || process.cwd();
-  await buildWebAssetsMeta();
-  const manifest = await readManifest(cwd);
-  if (!options.skipCompile) {
-    await prepublish(cwd, manifest, options.useYarn);
+  try {
+    const cwd = options.cwd || process.cwd();
+    await buildWebAssetsMeta();
+    const manifest = await readManifest(cwd);
+    if (!options.skipCompile) {
+      await prepublish(cwd, manifest, options.useYarn);
+    }
+    const files = await collect(manifest, options);
+    await validateMeta();
+    const jsFiles = files.filter(f => /\.js$/i.test(f.path));
+    if (files.length > 5000 || jsFiles.length > 100) {
+      console.log(
+        `此插件由 ${files.length} 个文件组成，其中包含 ${jsFiles.length} 个 JavaScript 文件，出于性能原因，建议您仅打包必要运行文件，您还可以通过配置 .ktignore 或 .vscodeignore 文件来排除不必要的文件`,
+      );
+    }
+    const packagePath = await getPackagePath(cwd, manifest, options);
+    await writeZipFile(files, path.resolve(packagePath));
+    return { manifest, packagePath, files };
+  } catch(e) {
+    throw e
+  } finally {
+    // 删除临时生成的 meta 文件
+    await rmMeta();
   }
-  const files = await collect(manifest, options);
-  await validateMeta();
-  const jsFiles = files.filter(f => /\.js$/i.test(f.path));
-  if (files.length > 5000 || jsFiles.length > 100) {
-    console.log(
-      `此插件由 ${files.length} 个文件组成，其中包含 ${jsFiles.length} 个 JavaScript 文件，出于性能原因，建议您仅打包必要运行文件，您还可以通过配置 .ktignore 或 .vscodeignore 文件来排除不必要的文件`,
-    );
-  }
-  const packagePath = await getPackagePath(cwd, manifest, options);
-  await writeZipFile(files, path.resolve(packagePath));
-  await rmMeta();
-  return { manifest, packagePath, files };
+
 }
 exports.pack = pack;
 async function packageCmd(options = {}) {
