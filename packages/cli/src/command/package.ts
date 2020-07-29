@@ -1030,7 +1030,7 @@ async function pack(options = {}) {
     const packagePath = await getPackagePath(cwd, manifest, options);
     await writeZipFile(files, path.resolve(packagePath));
     return { manifest, packagePath, files };
-  } catch(e) {
+  } catch (e) {
     throw e
   } finally {
     // 删除临时生成的 meta 文件

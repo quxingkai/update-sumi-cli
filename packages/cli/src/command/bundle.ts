@@ -1,70 +1,63 @@
 import { Command } from 'clipanion';
 import webpack from 'webpack';
-import * as path from 'path';
-import * as fs from 'fs-extra';
 import * as cp from 'child_process';
+import * as fse from 'fs-extra';
+import * as path from 'path';
 import formatWebpackMessages from 'react-dev-utils/formatWebpackMessages';
 
 import parallelRunPromise from '../scripts/parallel-run-promise';
+import getExtensionWebpackConfig from '../config/webpack/webpack.config.extension';
+import getBrowserWebpackConfig from '../config/webpack/webpack.config.browser';
+import getWebpackNodeConfig from '../config/webpack/webpack.config.node';
+import getWorkerWebpackConfig from '../config/webpack/webpack.config.worker';
+import { getExtPkgContent } from '../util/extension';
 
-
-import { createNodeDefaults, createBrowserDefaults, createWorkerDefaults } from '../scripts/webpack/createWebpackConfig';
-
-
-// TODO: mode#production/development
-async function getWebpackConfigs() {
-  const context = path.join(process.cwd());
-  const browserEntry = path.join(context, 'src/extend/browser/index.ts');
-  const nodeEntry = path.join(context, 'src/extend/node/index.ts');
-  const vscodeEntry = path.join(context, 'src/extension.ts');
-  const workerEntry = path.join(context, 'src/extend/worker/index.ts');
-
+async function getDefaultWebpackConfigs() {
+  const pkgContent = await getExtPkgContent();
   return [
-    fs.pathExistsSync(browserEntry) && createBrowserDefaults({ extensionDir: context, entry: {
-      'extension-browser': browserEntry
-    } }),
-    fs.pathExistsSync(nodeEntry) && createNodeDefaults({
-      extensionDir: context,
-      entry: {
-        'index': nodeEntry,
-      },
-      output: {
-        filename: '[name].js',
-        path: path.join(context, 'out', 'node'),
-        libraryTarget: 'commonjs',
-      },
-    }),
-    fs.pathExistsSync(vscodeEntry) && createNodeDefaults({
-      extensionDir: context,
-      entry: {
-        'extension': vscodeEntry,
-      }
-    }),
-    fs.pathExistsSync(workerEntry) && createWorkerDefaults({
-      extensionDir: context,
-      entry: {
-        'extension-worker': workerEntry,
-      }
-    })
+    getBrowserWebpackConfig,
+    getWebpackNodeConfig,
+    getExtensionWebpackConfig,
+    getWorkerWebpackConfig,
   ]
+    .map(fn => fn({ cwd: process.cwd(), pkgContent }))
     .filter(n => n);
 }
 
 type CompilerMethod = 'run' | 'watch';
 
-type RunTaskOptions = {
-  onSuccess: () => void;
-}
-
-async function bundle(compilerMethod: CompilerMethod, options?: RunTaskOptions) {
-  const webpackConfigs = await getWebpackConfigs();
-  const webpackTasks = webpackConfigs.map(webpackConfig => {
+function doWebpackTasks(webpackConfigs: webpack.Configuration[], compilerMethod: CompilerMethod) {
+  return webpackConfigs.map(webpackConfig => {
     return async () => {
       await runTask(webpackConfig, compilerMethod, options);
     };
   });
+}
 
-  await parallelRunPromise(webpackTasks, 1);
+function toWebpackConfig(configs: { [config: string]: webpack.Configuration }) {
+  return Object.keys(configs).map((key) => configs[key]);
+}
+
+type RunTaskOptions = {
+  onSuccess?: () => void;
+  useCustomConfig?: boolean;
+}
+
+async function bundle(compilerMethod: CompilerMethod, options?: RunTaskOptions) {
+  let bundleTasks: (() => Promise<void>)[] = [];
+  if (options && options.useCustomConfig) {
+    const webpackConfigPath = path.join(process.cwd(), 'kaitian-webpack.config.js');
+    if (!(await fse.pathExists(webpackConfigPath))) {
+      throw new Error(`请确保 ${process.cwd()} 目录下包含自定义 webpack 配置`);
+    }
+    const customWebpackConfig = require(webpackConfigPath);
+    bundleTasks = doWebpackTasks(toWebpackConfig(customWebpackConfig), compilerMethod);
+  } else {
+    const webpackConfigs = await getDefaultWebpackConfigs();
+    bundleTasks = doWebpackTasks(webpackConfigs, compilerMethod);
+  }
+
+  await parallelRunPromise(bundleTasks, 1);
 }
 
 function runTask(webpackConfig: any, compilerMethod: CompilerMethod, options?: RunTaskOptions) {
@@ -83,7 +76,7 @@ function runTask(webpackConfig: any, compilerMethod: CompilerMethod, options?: R
       }
 
       console.info(
-        'WEBPACK',
+        'KAITIAN',
         stats.toString({
           assets: true,
           colors: true,
@@ -100,10 +93,10 @@ function runTask(webpackConfig: any, compilerMethod: CompilerMethod, options?: R
       if (isSuccessful) {
         // @ts-ignore
         if (stats.stats) {
-          console.info('WEBPACK', 'Compiled successfully');
+          console.info('KAITIAN', 'Compiled successfully');
         } else {
           console.info(
-            'WEBPACK',
+            'KAITIAN',
             `Compiled successfully in ${(json.time / 1000).toFixed(1)}s!`,
           );
         }
@@ -111,7 +104,7 @@ function runTask(webpackConfig: any, compilerMethod: CompilerMethod, options?: R
       } else if (messages.errors.length) {
         console.log(messages.errors.join('\n\n'));
       } else if (messages.warnings.length) {
-        console.warn('WEBPACK', 'Compiled with warnings.');
+        console.warn('KAITIAN', 'Compiled with warnings.');
         console.log(messages.warnings.join('\n\n'));
       }
 
@@ -141,11 +134,16 @@ export class WatchCommand extends Command {
 
   @Command.String('--onSuccess')
   public onSuccessShell?: string;
+  @Command.Boolean('--config')
+  public config: boolean = false;
 
   @Command.Path('watch')
   async execute() {
     try {
-      await bundle('watch', { onSuccess: () => this.onSuccessShell && cp.exec(this.onSuccessShell) });
+      await bundle('watch', {
+        onSuccess: () => this.onSuccessShell && cp.exec(this.onSuccessShell),
+        useCustomConfig: this.config,
+      });
     } catch (err) {
       console.error('kaitian watch error:', err);
       process.exit(1);
@@ -164,10 +162,15 @@ export class CompileCommand extends Command {
     ],
   });
 
+  @Command.Boolean('--config')
+  public config: boolean = false;
+
   @Command.Path('compile')
   async execute() {
     try {
-      await bundle('run');
+      await bundle('run', {
+        useCustomConfig: this.config,
+      });
     } catch (err) {
       console.error('kaitian watch error:', err);
       process.exit(1);
