@@ -161,8 +161,13 @@ export const validateMeta = async () => {
 
 // main
 export const buildWebAssetsMeta = async () => {
-  const result = uniq(flattenDeep( await Promise.all(ANALYSIS_ENTRY_LIST.map(filePath => analysisSingleFile(filePath)))))
-    .map(p => replaceAbsolutePath2relative(p));
+
+  const initialPaths = [
+    path.resolve(execBasePath, 'package.json')
+  ]
+
+  const result = uniq(initialPaths.concat(flattenDeep( await Promise.all(ANALYSIS_ENTRY_LIST.map(filePath => analysisSingleFile(filePath)))))
+    .map(p => replaceAbsolutePath2relative(p)));
 
   const preFileContent = await (async () => {
     try {
