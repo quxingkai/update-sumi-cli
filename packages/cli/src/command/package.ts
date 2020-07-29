@@ -1,5 +1,5 @@
 import { Command } from 'clipanion';
-import { buildWebAssetsMeta, validateMeta } from './../util/analysis'
+import { buildWebAssetsMeta, validateMeta, rmMeta } from './../util/analysis'
 
 const fs = require('fs');
 const path = require('path');
@@ -996,12 +996,12 @@ async function getPackagePath(cwd, manifest, options = {}) {
 }
 async function pack(options = {}) {
   const cwd = options.cwd || process.cwd();
+  await buildWebAssetsMeta();
   const manifest = await readManifest(cwd);
   if (!options.skipCompile) {
     await prepublish(cwd, manifest, options.useYarn);
   }
   const files = await collect(manifest, options);
-  await buildWebAssetsMeta();
   await validateMeta();
   const jsFiles = files.filter(f => /\.js$/i.test(f.path));
   if (files.length > 5000 || jsFiles.length > 100) {
@@ -1011,6 +1011,7 @@ async function pack(options = {}) {
   }
   const packagePath = await getPackagePath(cwd, manifest, options);
   await writeZipFile(files, path.resolve(packagePath));
+  await rmMeta();
   return { manifest, packagePath, files };
 }
 exports.pack = pack;
