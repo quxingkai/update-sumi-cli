@@ -6,7 +6,7 @@ import * as path from 'path';
 
 export const execBasePath = process.cwd();
 
-export const metaFilePath = path.resolve(execBasePath, './meta.json');
+export const metaFilePath = path.resolve(execBasePath, './kaitian-meta.json');
 
 export const useKeyPathDirect = Symbol('useKeyPath');
 
@@ -177,4 +177,11 @@ export const buildWebAssetsMeta = async () => {
     ...preFileContent,
     "web-assets": result
   }, null, 2))
+}
+
+
+export const rmMeta = async () => {
+  if(await promisify(fs.exists)(metaFilePath)) {
+    await promisify(fs.unlink)(metaFilePath)
+  }
 }
