@@ -70,7 +70,8 @@ async function _publish(options) {
 
   const form = formstream();
   form.file('file', packagePath);
-  form.field('name', manifest.name);
+  // 处理部分内部包带有 @ali/alipay 前缀导致 name 跟插件市场的 name 不一致的问题
+  form.field('name', manifest.kaitianExtensionId || manifest.name);
 
   try {
     const { data } = await urllib.request(
