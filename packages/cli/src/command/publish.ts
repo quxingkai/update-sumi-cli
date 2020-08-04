@@ -78,6 +78,7 @@ async function _publish(options) {
       `${marketplaceApiAddress}/extension/upload`,
       {
         method: 'POST',
+        timeout: 0,
         dataType: 'json',
         headers: {
           ...form.headers(),
