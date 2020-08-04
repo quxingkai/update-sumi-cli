@@ -27,7 +27,7 @@ module.exports = (options = {}) => {
     .target('node')
     .end();
 
-  config.resolve.extensions.merge(['.js', 'ts']);
+  config.resolve.extensions.merge(['.js', '.ts']);
 
   config.optimization.minimize(false);
 
