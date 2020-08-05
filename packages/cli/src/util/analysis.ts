@@ -34,7 +34,7 @@ export const getIconAssetsFromIconThemeJSON = (themeDesc: any) => {
       const nextFile: string = fs.readFileSync(path.resolve(execBasePath, nextPath), 'utf-8');
       const nextDir = path.dirname(path.resolve(execBasePath, nextPath))
       const result = [...nextFile.matchAll(new RegExp(`"${nextMatch}":\\s*"(\\S+)"`, 'g'))].map(g => path.resolve(nextDir, g[1]))
-      return result
+      return [...result, path.resolve(execBasePath, nextPath)]
     }))
   }
 }
