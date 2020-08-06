@@ -150,10 +150,43 @@ export class InitCommand extends Command {
     return process.cwd();
   }
 
+  @Command.String('--name')
+  public name?: string;
+
+  @Command.String('--publisher')
+  public publisher?: string;
+
+  @Command.String('--displayName')
+  public displayName?: string;
+
+  @Command.String('--description')
+  public description?: string;
+
+  @Command.String('--targetPath')
+  public targetPath?: string = this.realTargetDir;
+
+  @Command.String('--targetTemplatePkg')
+  public targetTemplatePkg?: string = this.scaffold;
+
+
   @Command.Path('init')
   async execute() {
+
+    const isPureInit = [
+      this.name,
+      this.publisher
+    ].every(filed => !!filed)
+
     try {
-      await init(this.realTargetDir, this.scaffold);
+      isPureInit
+      ? (await pureInit({
+        name: this.name,
+        publisher: this.publisher,
+        description: this.description,
+        targetPath: this.targetPath,
+        targetTemplatePkg: this.targetTemplatePkg
+      } as PureInitOptions))
+      : (await init(this.realTargetDir, this.scaffold));
     } catch (err) {
       console.error('kaitian init error:', err);
       process.exit(1);
