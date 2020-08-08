@@ -10,6 +10,15 @@ import copy from 'kopy';
 
 import { npmClient, kaitianInfraDir } from '../const';
 
+type PureInitOptions = {
+  targetPath: string,
+  targetTemplatePkg: string,
+  name: string;
+  publisher: string;
+  displayName?: string;
+  description?: string;
+}
+
 const fsPromise = fs.promises;
 
 const defaultTemplatePkg = '@ali/kaitian-simple-ext-template';
@@ -51,6 +60,41 @@ function logMsg() {
   `);
 }
 
+export async function pureInit(pureInitOptions: PureInitOptions) {
+  const {
+    targetPath,
+    targetTemplatePkg,
+    name,
+    publisher,
+    displayName,
+    description
+  } = pureInitOptions;
+
+  await ensurePkgJSONFile(templateDir)
+
+  await execa.commandSync(`${npmClient} i ${targetTemplatePkg} -S`, { cwd: templateDir });
+
+  try {
+    const targetTemplatePath = path.resolve(templateDir, 'node_modules', targetTemplatePkg);
+    const { move } = require(path.resolve(targetTemplatePath, 'kaitian-template.config.js'));
+
+    const targetDir = targetPath || process.cwd();
+
+    await copy(path.resolve(targetTemplatePath, 'template'), targetDir, {
+      data: {
+        name,
+        publisher,
+        displayName,
+        description
+      },
+      move,
+    })
+  } catch(err) {
+    console.log(err.stack)
+  }
+}
+
+// katiian init --name {name} --displayName {displayName} --publisher {publisher}
 async function init(targetPath: string, targetTemplatePkg: string) {
   await ensurePkgJSONFile(templateDir);
   spinner.start(`Downloading template package ${targetTemplatePkg}`);
@@ -106,10 +150,43 @@ export class InitCommand extends Command {
     return process.cwd();
   }
 
+  @Command.String('--name')
+  public name?: string;
+
+  @Command.String('--publisher')
+  public publisher?: string;
+
+  @Command.String('--displayName')
+  public displayName?: string;
+
+  @Command.String('--description')
+  public description?: string;
+
+  @Command.String('--targetPath')
+  public targetPath?: string = this.realTargetDir;
+
+  @Command.String('--targetTemplatePkg')
+  public targetTemplatePkg?: string = this.scaffold;
+
+
   @Command.Path('init')
   async execute() {
+
+    const isPureInit = [
+      this.name,
+      this.publisher
+    ].every(filed => !!filed)
+
     try {
-      await init(this.realTargetDir, this.scaffold);
+      isPureInit
+      ? (await pureInit({
+        name: this.name,
+        publisher: this.publisher,
+        description: this.description,
+        targetPath: this.targetPath,
+        targetTemplatePkg: this.targetTemplatePkg
+      } as PureInitOptions))
+      : (await init(this.realTargetDir, this.scaffold));
     } catch (err) {
       console.error('kaitian init error:', err);
       process.exit(1);
