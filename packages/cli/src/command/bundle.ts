@@ -1,33 +1,51 @@
 import { Command } from 'clipanion';
 import webpack from 'webpack';
+import * as path from 'path';
+import * as fs from 'fs-extra';
 import formatWebpackMessages from 'react-dev-utils/formatWebpackMessages';
 
 import parallelRunPromise from '../scripts/parallel-run-promise';
-import getEntryWebpackConfig from '../scripts/webpack/webpack.config.entry';
-import getBrowserWebpackConfig from '../scripts/webpack/webpack.config.browser';
-import getWebpackNodeConfig from '../scripts/webpack/webpack.config.node';
-import getWorkerWebpackConfig from '../scripts/webpack/webpack.config.worker';
 
-import { getExtPkgContent } from '../util/extension';
+import { createNodeDefaults, createBrowserDefaults, createWorkerDefaults } from '../scripts/webpack/createWebpackConfig';
 
 // TODO: mode#production/development
 async function getWebpackConfigs() {
-  const pkgContent = await getExtPkgContent();
+  const context = path.join(process.cwd());
+  const browserEntry = path.join(context, 'src/extend/browser/index.ts');
+  const nodeEntry = path.join(context, 'src/extend/node/index.ts');
+  const vscodeEntry = path.join(context, 'src/extension.ts');
+  const workerEntry = path.join(context, 'src/extend/worker/index.ts');
+
   return [
-    getBrowserWebpackConfig,
-    getWebpackNodeConfig,
-    getEntryWebpackConfig,
-    getWorkerWebpackConfig,
-  ]
-    .map(fn => {
-      const result = fn({ cwd: process.cwd(), pkgContent });
-      if (result) {
-        return result.toConfig();
+    fs.pathExistsSync(browserEntry) && createBrowserDefaults({ extensionDir: context, entry: {
+      'extension-browser': browserEntry
+    } }),
+    fs.pathExistsSync(nodeEntry) && createNodeDefaults({
+      extensionDir: context,
+      entry: {
+        'index': nodeEntry,
+      },
+      output: {
+        filename: '[name].js',
+        path: path.join(context, 'out', 'node'),
+        libraryTarget: 'commonjs',
+      },
+    }),
+    fs.pathExistsSync(vscodeEntry) && createNodeDefaults({
+      extensionDir: context,
+      entry: {
+        'extension': vscodeEntry,
+      }
+    }),
+    fs.pathExistsSync(workerEntry) && createWorkerDefaults({
+      extensionDir: context,
+      entry: {
+        'extension-worker': workerEntry,
       }
     })
+  ]
     .filter(n => n);
 }
-// webpackConfigs.push(getBrowserWebpackConfig({cwd, pkgContent}));
 
 type CompilerMethod = 'run' | 'watch';
 
@@ -40,7 +58,7 @@ async function bundle(compilerMethod: CompilerMethod) {
   });
 
   await parallelRunPromise(webpackTasks, 1);
-};
+}
 
 function runTask(webpackConfig: any, compilerMethod: CompilerMethod) {
   return new Promise((resolve, reject) => {

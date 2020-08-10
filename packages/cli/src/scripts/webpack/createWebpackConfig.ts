@@ -1,0 +1,199 @@
+'use strict';
+
+import webpack from "webpack";
+
+const path = require('path');
+const fs = require('fs');
+const { merge } = require('webpack-merge');
+const { NLSBundlePlugin } = require('vscode-nls-dev/lib/webpack-bundler');
+const { DefinePlugin } = require('webpack');
+
+import { PackageNLSPlugin } from './PackageNLSPlugin';
+
+interface ExtensionBundleConfig extends webpack.Configuration {
+  extensionDir: string;
+}
+
+export function createNodeDefaults(extConfig: ExtensionBundleConfig) {
+  const { extensionDir, ...restConfig } = extConfig;
+  const folderName = path.resolve(extensionDir).split(/[\\\/]/)[0];
+  const pkgPath = path.join(folderName, 'package.json');
+  const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+  const id = `${pkg.publisher}.${pkg.name}`;
+
+  let defaultConfig: webpack.Configuration = {
+    mode: 'production',
+    target: 'node',
+    entry: extConfig.entry || {
+      extension: path.join(extensionDir, 'src/extension.ts'),
+    },
+    node: {
+      __dirname: false,
+    },
+    resolve: {
+      mainFields: ['module', 'main'],
+      extensions: ['.ts', '.js'],
+    },
+    module: {
+      rules: [
+        {
+          test: /\.ts$/,
+          exclude: /node_modules/,
+          use: [
+            {
+              // vscode-nls-dev loader:
+              // * rewrite nls-calls
+              loader: require.resolve('vscode-nls-dev/lib/webpack-loader'),
+              options: {
+                base: path.join(extensionDir, 'src'),
+              },
+            },
+            {
+              loader: require.resolve('ts-loader'),
+              options: {
+                compilerOptions: {
+                  sourceMap: false,
+                },
+              },
+            },
+          ],
+        },
+      ],
+    },
+    externals: {
+      vscode: 'commonjs vscode',
+      kaitian: 'commonjs kaitian',
+    },
+    output: {
+      filename: '[name].js',
+      path: path.join(extensionDir, 'out'),
+      libraryTarget: 'commonjs',
+    },
+    devtool: false,
+    plugins: [
+      new NLSBundlePlugin(id),
+      new PackageNLSPlugin('out')
+    ],
+  };
+
+  return merge(defaultConfig, restConfig);
+}
+
+export function createBrowserDefaults(extConfig: ExtensionBundleConfig) {
+  const { extensionDir, ...restConfig } = extConfig;
+  let defaultConfig: webpack.Configuration = {
+    mode: 'production',
+    target: 'web',
+    resolve: {
+      mainFields: ['module', 'main'],
+      extensions: ['.ts', '.js', '.less', '.css', '.tsx', '.jsx'],
+    },
+    module: {
+      rules: [
+        {
+          test: /\.tsx$/,
+          exclude: /node_modules/,
+          use: [
+            {
+              loader: require.resolve('ts-loader'),
+              options: {
+                compilerOptions: {
+                  sourceMap: false,
+                },
+              },
+            },
+          ],
+        },
+        {
+          test: /\.less$/,
+          use: [
+            require.resolve('style-loader'),
+            require.resolve('css-loader'),
+            {
+              loader: require.resolve('less-loader'),
+              options: {
+                lessOptions: {
+                  javascriptEnabled: true,
+                }
+              },
+            },
+          ],
+        },
+        {
+          test: /\.css$/,
+          use: [
+            require.resolve('style-loader'),
+            require.resolve('css-loader'),
+          ],
+        },
+      ],
+    },
+    externals: {
+      'react': 'React',
+      'react-dom': 'ReactDOM',
+      'kaitian-browser': 'kaitian-browser',
+    },
+    performance: {
+      hints: false,
+    },
+    output: {
+      filename: 'index.js',
+      path: path.join(extensionDir, 'out', 'browser'),
+      libraryTarget: 'umd',
+    },
+    devtool: false,
+    plugins: [
+    ],
+  };
+
+  return merge(defaultConfig, restConfig);
+}
+
+export function createWorkerDefaults(extConfig: ExtensionBundleConfig) {
+  const { extensionDir, ...restConfig } = extConfig;
+  let defaultConfig: webpack.Configuration = {
+    mode: 'production',
+    target: 'webworker',
+    resolve: {
+      mainFields: ['module', 'main'],
+      extensions: ['.ts', '.js'],
+    },
+    module: {
+      rules: [
+        {
+          test: /\.ts$/,
+          exclude: /node_modules/,
+          use: [
+            {
+              loader: require.resolve('ts-loader'),
+              options: {
+                compilerOptions: {
+                  sourceMap: false,
+                },
+              },
+            },
+          ],
+        },
+      ],
+    },
+    externals: {
+      vscode: 'vscode',
+      kaitian: 'kaitian',
+      'kaitian-worker': 'kaitian-worker'
+    },
+    performance: {
+      hints: false,
+    },
+    output: {
+      filename: 'index.js',
+      path: path.join(extensionDir, 'out', 'worker'),
+      libraryTarget: 'commonjs',
+    },
+    devtool: false,
+    plugins: [
+      new DefinePlugin({ WEBWORKER: JSON.stringify(true) }),
+    ],
+  };
+
+  return merge(defaultConfig, restConfig);
+}
