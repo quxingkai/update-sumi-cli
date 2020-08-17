@@ -86,12 +86,12 @@ export function createBrowserDefaults(extConfig: ExtensionBundleConfig) {
     target: 'web',
     resolve: {
       mainFields: ['module', 'main'],
-      extensions: ['.ts', '.js', '.less', '.css', '.tsx', '.jsx'],
+      extensions: ['.ts', '.tsx', '.js', '.json', '.less'],
     },
     module: {
       rules: [
         {
-          test: /\.tsx$/,
+          test: /\.tsx?$/,
           exclude: /node_modules/,
           use: [
             {
@@ -105,6 +105,36 @@ export function createBrowserDefaults(extConfig: ExtensionBundleConfig) {
           ],
         },
         {
+          test: /\.css$/,
+          use: [
+            require.resolve('style-loader'),
+            require.resolve('css-loader'),
+          ],
+        },
+        {
+          test: /\.module.less$/,
+          use: [{
+              loader: require.resolve('style-loader'),
+            },
+            {
+              loader: require.resolve('css-loader'),
+              options: {
+                sourceMap: true,
+                modules: true,
+                localIdentName: "[local]___[hash:base64:5]"
+              }
+            },
+            {
+              loader: require.resolve('less-loader'),
+              options: {
+                lessOptions: {
+                  javascriptEnabled: true,
+                }
+              }
+            }
+          ]
+        },
+        {
           test: /\.less$/,
           use: [
             require.resolve('style-loader'),
@@ -115,16 +145,19 @@ export function createBrowserDefaults(extConfig: ExtensionBundleConfig) {
                 lessOptions: {
                   javascriptEnabled: true,
                 }
-              },
+              }
             },
           ],
         },
         {
-          test: /\.css$/,
-          use: [
-            require.resolve('style-loader'),
-            require.resolve('css-loader'),
-          ],
+          test: /\.(woff(2)?|ttf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,
+          use: [{
+            loader: require.resolve('file-loader'),
+            options: {
+              name: '[name].[ext]',
+              outputPath: 'fonts/'
+            }
+          }]
         },
       ],
     },
