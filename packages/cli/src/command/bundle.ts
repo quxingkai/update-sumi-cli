@@ -3,8 +3,6 @@ import webpack from 'webpack';
 import * as path from 'path';
 import * as fs from 'fs-extra';
 import * as cp from 'child_process';
-import denodeify from 'denodeify';
-
 import formatWebpackMessages from 'react-dev-utils/formatWebpackMessages';
 
 import parallelRunPromise from '../scripts/parallel-run-promise';
@@ -12,10 +10,6 @@ import parallelRunPromise from '../scripts/parallel-run-promise';
 
 import { createNodeDefaults, createBrowserDefaults, createWorkerDefaults } from '../scripts/webpack/createWebpackConfig';
 
-const exec = denodeify(cp.exec, (err, stdout, stderr) => [
-  err,
-  { stdout, stderr },
-]);
 
 // TODO: mode#production/development
 async function getWebpackConfigs() {
@@ -109,7 +103,7 @@ function runTask(webpackConfig: any, compilerMethod: CompilerMethod, options?: R
             `Compiled successfully in ${(json.time / 1000).toFixed(1)}s!`,
           );
         }
-        options && options.onSuccess();
+        options?.onSuccess && options.onSuccess();
       } else if (messages.errors.length) {
         console.log(messages.errors.join('\n\n'));
       } else if (messages.warnings.length) {
@@ -147,7 +141,7 @@ export class WatchCommand extends Command {
   @Command.Path('watch')
   async execute() {
     try {
-      await bundle('watch', { onSuccess: () => exec(this.onSuccessShell) });
+      await bundle('watch', { onSuccess: () => this.onSuccessShell && cp.exec(this.onSuccessShell) });
     } catch (err) {
       console.error('kaitian watch error:', err);
       process.exit(1);
