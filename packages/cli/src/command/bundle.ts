@@ -2,11 +2,20 @@ import { Command } from 'clipanion';
 import webpack from 'webpack';
 import * as path from 'path';
 import * as fs from 'fs-extra';
+import * as cp from 'child_process';
+import denodeify from 'denodeify';
+
 import formatWebpackMessages from 'react-dev-utils/formatWebpackMessages';
 
 import parallelRunPromise from '../scripts/parallel-run-promise';
 
+
 import { createNodeDefaults, createBrowserDefaults, createWorkerDefaults } from '../scripts/webpack/createWebpackConfig';
+
+const exec = denodeify(cp.exec, (err, stdout, stderr) => [
+  err,
+  { stdout, stderr },
+]);
 
 // TODO: mode#production/development
 async function getWebpackConfigs() {
@@ -49,18 +58,22 @@ async function getWebpackConfigs() {
 
 type CompilerMethod = 'run' | 'watch';
 
-async function bundle(compilerMethod: CompilerMethod) {
+type RunTaskOptions = {
+  onSuccess: () => void;
+}
+
+async function bundle(compilerMethod: CompilerMethod, options?: RunTaskOptions) {
   const webpackConfigs = await getWebpackConfigs();
   const webpackTasks = webpackConfigs.map(webpackConfig => {
     return async () => {
-      await runTask(webpackConfig, compilerMethod);
+      await runTask(webpackConfig, compilerMethod, options);
     };
   });
 
   await parallelRunPromise(webpackTasks, 1);
 }
 
-function runTask(webpackConfig: any, compilerMethod: CompilerMethod) {
+function runTask(webpackConfig: any, compilerMethod: CompilerMethod, options?: RunTaskOptions) {
   return new Promise((resolve, reject) => {
     const compiler = webpack(compilerMethod === 'watch' ? Object.assign(webpackConfig, { devtool: 'inline-source-map' }) : webpackConfig);
 
@@ -96,6 +109,7 @@ function runTask(webpackConfig: any, compilerMethod: CompilerMethod) {
             `Compiled successfully in ${(json.time / 1000).toFixed(1)}s!`,
           );
         }
+        options && options.onSuccess();
       } else if (messages.errors.length) {
         console.log(messages.errors.join('\n\n'));
       } else if (messages.warnings.length) {
@@ -127,10 +141,13 @@ export class WatchCommand extends Command {
     ],
   });
 
+  @Command.String('--onSuccess')
+  public onSuccessShell?: string;
+
   @Command.Path('watch')
   async execute() {
     try {
-      await bundle('watch');
+      await bundle('watch', { onSuccess: () => exec(this.onSuccessShell) });
     } catch (err) {
       console.error('kaitian watch error:', err);
       process.exit(1);
