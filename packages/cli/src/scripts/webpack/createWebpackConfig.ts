@@ -16,8 +16,7 @@ interface ExtensionBundleConfig extends webpack.Configuration {
 
 export function createNodeDefaults(extConfig: ExtensionBundleConfig) {
   const { extensionDir, ...restConfig } = extConfig;
-  const folderName = path.resolve(extensionDir).split(/[\\\/]/)[0];
-  const pkgPath = path.join(folderName, 'package.json');
+  const pkgPath = path.join(extensionDir, 'package.json');
   const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
   const id = `${pkg.publisher}.${pkg.name}`;
 
