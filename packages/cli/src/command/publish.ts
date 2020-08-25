@@ -47,7 +47,42 @@ function readManifestFromPackage(packagePath) {
   });
 }
 
-async function _publish(options) {
+async function publishByPrivateToken(options, privateToken: string, publisher: string) {
+  const { packagePath, manifest } = options;
+  console.log(chalk.green(`Publishing ${manifest.name} ...`));
+  console.log(chalk.green(`Uploading ${manifest.name} to marketplace...`));
+
+  const form = formstream();
+  form.file('file', packagePath);
+  // 处理部分内部包带有 @ali/alipay 前缀导致 name 跟插件市场的 name 不一致的问题
+  form.field('name', manifest.kaitianExtensionId || manifest.name);
+
+
+  try {
+    const { data } = await urllib.request(
+      `${marketplaceApiAddress}/extension/upload?publisher=${publisher}`,
+      {
+        method: 'POST',
+        timeout: 2 * 60 * 1000,
+        dataType: 'json',
+        headers: {
+          ...form.headers(),
+          'x-private-token': privateToken,
+        },
+        stream: form,
+      },
+    );
+
+    console.log(chalk.green('extensionReleaseId: '), data.extensionReleaseId);
+
+    console.log(chalk.green('Done.'));
+  } catch (err) {
+    console.log(chalk.red(err.message));
+  }
+}
+
+
+async function publishByAccountIdAndMasterKey(options) {
   const { packagePath, manifest } = options;
 
   let teamAccount: ITeamAccount | undefined = undefined;
@@ -97,7 +132,16 @@ async function _publish(options) {
   }
 }
 
-function publish(packagePath: string, ignoreFile: string, skipCompile?: boolean) {
+function publish(packagePath: string, options: {
+  ignoreFile: string,
+  skipCompile?: boolean,
+  privateToken?: string,
+  publisher?: string,
+}) {
+  const { ignoreFile, skipCompile, privateToken, publisher } = options;
+
+  const usePrivateTokenUpload = privateToken && publisher;
+
   let promise;
   if (packagePath) {
     promise = readManifestFromPackage(packagePath).then(manifest => ({
@@ -119,7 +163,9 @@ function publish(packagePath: string, ignoreFile: string, skipCompile?: boolean)
     });
   }
 
-  return promise.then(_publish);
+  return promise.then(usePrivateTokenUpload
+    ? (options) => publishByPrivateToken(options, privateToken!, publisher!)
+    : publishByAccountIdAndMasterKey);
 }
 
 export class PublishCommand extends Command {
@@ -148,8 +194,19 @@ export class PublishCommand extends Command {
   @Command.String('--ignoreFile')
   public ignoreFile!: string;
 
+  @Command.String('--privateToken')
+  public privateToken?: string;
+
+  @Command.String('--publisher')
+  public publisher?: string;
+
   @Command.Path('publish')
   async execute() {
-    await publish(this.file, this.ignoreFile, this.skipCompile);
+    await publish(this.file, {
+      ignoreFile: this.ignoreFile,
+      skipCompile: this.skipCompile,
+      privateToken: this.privateToken,
+      publisher: this.publisher,
+    });
   }
 }
