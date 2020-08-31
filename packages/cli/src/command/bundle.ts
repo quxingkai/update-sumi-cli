@@ -103,7 +103,7 @@ function runTask(webpackConfig: any, compilerMethod: CompilerMethod, options?: R
             `Compiled successfully in ${(json.time / 1000).toFixed(1)}s!`,
           );
         }
-        options?.onSuccess && options.onSuccess();
+        options && options.onSuccess();
       } else if (messages.errors.length) {
         console.log(messages.errors.join('\n\n'));
       } else if (messages.warnings.length) {
