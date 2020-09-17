@@ -17,6 +17,7 @@ type PureInitOptions = {
   publisher: string;
   displayName?: string;
   description?: string;
+  repositoryUrl?: string;
 }
 
 const fsPromise = fs.promises;
@@ -67,7 +68,8 @@ export async function pureInit(pureInitOptions: PureInitOptions) {
     name,
     publisher,
     displayName,
-    description
+    description,
+    repositoryUrl,
   } = pureInitOptions;
 
   await ensurePkgJSONFile(templateDir)
@@ -85,7 +87,8 @@ export async function pureInit(pureInitOptions: PureInitOptions) {
         name,
         publisher,
         displayName,
-        description
+        description,
+        repositoryUrl
       },
       move,
     })
@@ -167,6 +170,9 @@ export class InitCommand extends Command {
 
   @Command.String('--targetTemplatePkg')
   public targetTemplatePkg?: string = this.scaffold;
+  
+  @Command.String('--repositoryUrl')
+  public repositoryUrl?: string;
 
 
   @Command.Path('init')
@@ -184,7 +190,8 @@ export class InitCommand extends Command {
         publisher: this.publisher,
         description: this.description,
         targetPath: this.targetPath,
-        targetTemplatePkg: this.targetTemplatePkg
+        targetTemplatePkg: this.targetTemplatePkg,
+        repositoryUrl: this.repositoryUrl,
       } as PureInitOptions))
       : (await init(this.realTargetDir, this.scaffold));
     } catch (err) {
