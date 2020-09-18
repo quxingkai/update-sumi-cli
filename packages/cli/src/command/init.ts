@@ -1,6 +1,5 @@
 import path from 'path';
 import fs from 'fs';
-
 import { Command } from 'clipanion';
 import chalk from 'chalk';
 import inquirer from 'inquirer';
@@ -11,12 +10,9 @@ import copy from 'kopy';
 import { npmClient, kaitianInfraDir } from '../const';
 
 type PureInitOptions = {
+  templateData: string
   targetPath: string,
   targetTemplatePkg: string,
-  name: string;
-  publisher: string;
-  displayName?: string;
-  description?: string;
 }
 
 const fsPromise = fs.promises;
@@ -64,12 +60,16 @@ export async function pureInit(pureInitOptions: PureInitOptions) {
   const {
     targetPath,
     targetTemplatePkg,
-    name,
-    publisher,
-    displayName,
-    description
+    templateData: templateDataStr = '',
   } = pureInitOptions;
 
+  const templateData = templateDataStr.split('&').reduce((pre: any, curStr: string) => {
+    const [key, value] = curStr.split('=');
+    return {
+      ...pre,
+      [key]: value
+    }
+  } , {})
   await ensurePkgJSONFile(templateDir)
 
   await execa.commandSync(`${npmClient} i ${targetTemplatePkg} -S`, { cwd: templateDir });
@@ -81,12 +81,7 @@ export async function pureInit(pureInitOptions: PureInitOptions) {
     const targetDir = targetPath || process.cwd();
 
     await copy(path.resolve(targetTemplatePath, 'template'), targetDir, {
-      data: {
-        name,
-        publisher,
-        displayName,
-        description
-      },
+      data: templateData,
       move,
     })
   } catch(err) {
@@ -149,42 +144,26 @@ export class InitCommand extends Command {
 
     return process.cwd();
   }
-
-  @Command.String('--name')
-  public name?: string;
-
-  @Command.String('--publisher')
-  public publisher?: string;
-
-  @Command.String('--displayName')
-  public displayName?: string;
-
-  @Command.String('--description')
-  public description?: string;
-
   @Command.String('--targetPath')
   public targetPath?: string = this.realTargetDir;
 
-  @Command.String('--targetTemplatePkg')
-  public targetTemplatePkg?: string = this.scaffold;
-
+  @Command.String('--templateData')
+  public templateData?: string;
 
   @Command.Path('init')
   async execute() {
 
     const isPureInit = [
-      this.name,
-      this.publisher
-    ].every(filed => !!filed)
+      this.templateData,
+    ].every(filed => !!filed);
+
 
     try {
       isPureInit
       ? (await pureInit({
-        name: this.name,
-        publisher: this.publisher,
-        description: this.description,
+        templateData: this.templateData,
         targetPath: this.targetPath,
-        targetTemplatePkg: this.targetTemplatePkg
+        targetTemplatePkg: this.scaffold,
       } as PureInitOptions))
       : (await init(this.realTargetDir, this.scaffold));
     } catch (err) {
