@@ -48,14 +48,14 @@ function readManifestFromPackage(packagePath) {
 }
 
 async function publishByPrivateToken(options, privateToken: string, publisher: string) {
-  const { packagePath, manifest } = options;
+  const { packagePath, manifest, name } = options;
   console.log(chalk.green(`Publishing ${manifest.name} ...`));
   console.log(chalk.green(`Uploading ${manifest.name} to marketplace...`));
 
   const form = formstream();
   form.file('file', packagePath);
   // 处理部分内部包带有 @ali/alipay 前缀导致 name 跟插件市场的 name 不一致的问题
-  form.field('name', manifest.kaitianExtensionId || manifest.name);
+  form.field('name', name || manifest.kaitianExtensionId || manifest.name);
 
 
   try {
@@ -83,7 +83,7 @@ async function publishByPrivateToken(options, privateToken: string, publisher: s
 
 
 async function publishByAccountIdAndMasterKey(options) {
-  const { packagePath, manifest } = options;
+  const { packagePath, manifest, name } = options;
 
   let teamAccount: ITeamAccount | undefined = undefined;
   if (process.env.KT_EXT_ACCOUNT_ID && process.env.KT_EXT_MASTER_KEY) {
@@ -106,7 +106,7 @@ async function publishByAccountIdAndMasterKey(options) {
   const form = formstream();
   form.file('file', packagePath);
   // 处理部分内部包带有 @ali/alipay 前缀导致 name 跟插件市场的 name 不一致的问题
-  form.field('name', manifest.kaitianExtensionId || manifest.name);
+  form.field('name', name || manifest.kaitianExtensionId || manifest.name);
 
   try {
     const { data } = await urllib.request(
@@ -137,6 +137,7 @@ function publish(packagePath: string, options: {
   skipCompile?: boolean,
   privateToken?: string,
   publisher?: string,
+  name?: string,
 }) {
   const { ignoreFile, skipCompile, privateToken, publisher } = options;
 
@@ -200,13 +201,16 @@ export class PublishCommand extends Command {
   @Command.String('--publisher')
   public publisher?: string;
 
+  @Command.String('--name')
+  public name?: string;
+
   @Command.Path('publish')
   async execute() {
     await publish(this.file, {
       ignoreFile: this.ignoreFile,
       skipCompile: this.skipCompile,
       privateToken: this.privateToken,
-      publisher: this.publisher,
+      name: this.name,
     });
   }
 }
