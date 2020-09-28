@@ -210,6 +210,7 @@ export class PublishCommand extends Command {
       ignoreFile: this.ignoreFile,
       skipCompile: this.skipCompile,
       privateToken: this.privateToken,
+      publisher: this.publisher,
       name: this.name,
     });
   }
