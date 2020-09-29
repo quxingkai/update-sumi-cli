@@ -2,11 +2,10 @@ import { Command } from 'clipanion';
 import os from 'os';
 
 import { marketplaceApiAddress } from '../const';
-import { kaitianConfiguration, ITeamAccount } from '../config';
 import { getExtPkgContent } from '../util/extension';
+import { ITeamAccount, kaitianConfiguration } from '../config';
 
 const yauzl = require('yauzl');
-const tmp = require('tmp');
 const formstream = require('formstream');
 
 const chalk = require('chalk');
@@ -31,7 +30,7 @@ function readManifestFromPackage(packagePath) {
           if (err) {
             return e(err);
           }
-          const buffers = [];
+          const buffers:any = [];
           stream.on('data', buffer => buffers.push(buffer));
           stream.once('error', e);
           stream.once('end', () => {
@@ -45,128 +44,6 @@ function readManifestFromPackage(packagePath) {
       });
     });
   });
-}
-
-async function publishByPrivateToken(options, privateToken: string, publisher: string) {
-  const { packagePath, manifest, name } = options;
-  console.log(chalk.green(`Publishing ${manifest.name} ...`));
-  console.log(chalk.green(`Uploading ${manifest.name} to marketplace...`));
-
-  const form = formstream();
-  form.file('file', packagePath);
-  // 处理部分内部包带有 @ali/alipay 前缀导致 name 跟插件市场的 name 不一致的问题
-  form.field('name', name || manifest.kaitianExtensionId || manifest.name);
-
-
-  try {
-    const { data } = await urllib.request(
-      `${marketplaceApiAddress}/extension/upload?publisher=${publisher}`,
-      {
-        method: 'POST',
-        timeout: 2 * 60 * 1000,
-        dataType: 'json',
-        headers: {
-          ...form.headers(),
-          'x-private-token': privateToken,
-        },
-        stream: form,
-      },
-    );
-
-    console.log(chalk.green('extensionReleaseId: '), data.extensionReleaseId);
-
-    console.log(chalk.green('Done.'));
-  } catch (err) {
-    console.log(chalk.red(err.message));
-  }
-}
-
-
-async function publishByAccountIdAndMasterKey(options) {
-  const { packagePath, manifest, name } = options;
-
-  let teamAccount: ITeamAccount | undefined = undefined;
-  if (process.env.KT_EXT_ACCOUNT_ID && process.env.KT_EXT_MASTER_KEY) {
-    teamAccount = {
-      accountId: process.env.KT_EXT_ACCOUNT_ID,
-      masterKey: process.env.KT_EXT_MASTER_KEY,
-    }
-  } else {
-    teamAccount = await kaitianConfiguration.getTeamAccount(manifest.publisher);
-  }
-
-  if (!teamAccount) {
-    console.log(chalk.red(`Please login for publisher:${manifest.publisher} firstly`));
-    return;
-  }
-
-  console.log(chalk.green(`Publishing ${manifest.name} ...`));
-  console.log(chalk.green(`Uploading ${manifest.name} to marketplace...`));
-
-  const form = formstream();
-  form.file('file', packagePath);
-  // 处理部分内部包带有 @ali/alipay 前缀导致 name 跟插件市场的 name 不一致的问题
-  form.field('name', name || manifest.kaitianExtensionId || manifest.name);
-
-  try {
-    const { data } = await urllib.request(
-      `${marketplaceApiAddress}/extension/upload`,
-      {
-        method: 'POST',
-        timeout: 2 * 60 * 1000,
-        dataType: 'json',
-        headers: {
-          ...form.headers(),
-          'x-account-id': teamAccount.accountId,
-          'x-master-key': teamAccount.masterKey,
-        },
-        stream: form,
-      },
-    );
-
-    console.log(chalk.green('extensionReleaseId: '), data.extensionReleaseId);
-
-    console.log(chalk.green('Done.'));
-  } catch (err) {
-    console.log(chalk.red(err.message));
-  }
-}
-
-function publish(packagePath: string, options: {
-  ignoreFile: string,
-  skipCompile?: boolean,
-  privateToken?: string,
-  publisher?: string,
-  name?: string,
-}) {
-  const { ignoreFile, skipCompile, privateToken, publisher } = options;
-
-  const usePrivateTokenUpload = privateToken && publisher;
-
-  let promise;
-  if (packagePath) {
-    promise = readManifestFromPackage(packagePath).then(manifest => ({
-      manifest,
-      packagePath
-    }));
-  } else {
-    const cwd = process.cwd();
-    const useYarn = false;
-
-    promise = getExtPkgContent().then(pkg => {
-      return pack({
-        cwd,
-        packagePath: os.tmpdir(),
-        useYarn,
-        skipCompile,
-        ignoreFile,
-      });
-    });
-  }
-
-  return promise.then(usePrivateTokenUpload
-    ? (options) => publishByPrivateToken(options, privateToken!, publisher!)
-    : publishByAccountIdAndMasterKey);
 }
 
 export class PublishCommand extends Command {
@@ -206,12 +83,128 @@ export class PublishCommand extends Command {
 
   @Command.Path('publish')
   async execute() {
-    await publish(this.file, {
+    await this.publish(this.file, {
       ignoreFile: this.ignoreFile,
       skipCompile: this.skipCompile,
       privateToken: this.privateToken,
       publisher: this.publisher,
       name: this.name,
     });
+  }
+
+  private async publishToMarketplace(pkgContent, options) {
+    const { name, publisher } = options;
+    const { packagePath, manifest } = pkgContent;
+    this.success(`Uploading ${manifest.name} to marketplace...`);
+
+    const form = formstream();
+    form.file('file', packagePath);
+    // 处理部分内部包带有 @ali/alipay 前缀导致 name 跟插件市场的 name 不一致的问题
+    form.field('name', name || manifest.kaitianExtensionId || manifest.name);
+    const headers = await this.getHeaders(options);
+
+    if (!headers) {
+      this.error('not found ak');
+      return;
+    }
+
+    try {
+      const res = await urllib.request(
+        `${process.env.KT_EXT_ENDPOINT || marketplaceApiAddress}/extension/upload?publisher=${publisher}`,
+        {
+          method: 'POST',
+          timeout: 2 * 60 * 1000,
+          dataType: 'json',
+          headers: {
+            ...form.headers(),
+            ...headers,
+          },
+          stream: form,
+        },
+      );
+
+      if (res.status === 200) {
+        this.success(`publisher: ${res.data.publisher}`);
+        this.success(`name: ${res.data.name}`);
+        this.success(`extensionReleaseId: ${res.data.extensionReleaseId}`);
+        this.success('Done.');
+      } else {
+        this.error(res.data.error || res.data.message);
+      }
+    } catch (err) {
+      this.error(err.message);
+    }
+  }
+
+  private async publish(packagePath: string, options: {
+    ignoreFile: string,
+    skipCompile?: boolean,
+    privateToken?: string,
+    publisher?: string,
+    name?: string,
+  }) {
+    const { ignoreFile, skipCompile } = options;
+
+    let promise;
+    if (packagePath) {
+      promise = readManifestFromPackage(packagePath).then(manifest => ({
+        manifest,
+        packagePath
+      }));
+    } else {
+      const cwd = process.cwd();
+      const useYarn = false;
+
+      promise = getExtPkgContent().then(pkg => {
+        return pack({
+          cwd,
+          packagePath: os.tmpdir(),
+          useYarn,
+          skipCompile,
+          ignoreFile,
+        });
+      });
+    }
+
+    const pkgContent = await promise;
+    await this.publishToMarketplace(pkgContent, options);
+  }
+
+  private async getHeaders(options) {
+    const { privateToken, publisher } = options;
+
+    const usePrivateTokenUpload = privateToken && publisher;
+
+    if (usePrivateTokenUpload) {
+      return {
+        'x-private-token': privateToken,
+      };
+    }
+
+    let teamAccount: ITeamAccount | undefined = undefined;
+    if (process.env.KT_EXT_ACCOUNT_ID && process.env.KT_EXT_MASTER_KEY) {
+      teamAccount = {
+        accountId: process.env.KT_EXT_ACCOUNT_ID,
+        masterKey: process.env.KT_EXT_MASTER_KEY,
+      }
+    } else {
+      teamAccount = await kaitianConfiguration.getTeamAccount(publisher);
+    }
+
+    if (teamAccount) {
+      return {
+        'x-account-id': teamAccount.accountId,
+        'x-master-key': teamAccount.masterKey,
+      };
+    }
+
+  }
+
+  private success(msg: string) {
+    this.context.stdout.write(`${chalk.green(msg)}\n`);
+  }
+
+  private error(msg: string) {
+    this.context.stderr.write(`${chalk.red(msg)}\n`);
   }
 }

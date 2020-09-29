@@ -9,12 +9,11 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
-    "strict": true,
+    "strict": false,
     "forceConsistentCasingInFileNames": true,
-    "noImplicitReturns": true,
     "suppressImplicitAnyIndexErrors": true,
     "declaration": true,
-    "outDir": "./lib"
+    "outDir": "./lib",
   },
   "include": [
     "src",
@@ -23,6 +22,7 @@
   ],
   "exclude": [
     "node_modules",
-    "lib"
+    "lib",
+    "__test__"
   ]
 }

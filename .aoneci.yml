@@ -1,32 +1,27 @@
 # 不要修改该文件，会自动生成，详见 https://gitlab.alibaba-inc.com/node/ci
 
 stage:
-  prepare_node_10:
+  node-10-单元测试:
     env:
-      setting: {}
-      lang: NODEJS
-      image: cise/cise_6u2
+      image: 'aone-base-global/alios7-nodejs-ci:1.0.0'
     plugin:
       -
         param:
           url: '${repo}'
           branch: '${branch}'
           path: '${source_root}'
+          isDelGit: 'false'
         name: checkout
         pos: front
+      -
+        param:
+          version: node-10
+          source: '${source_root}'
+        name: node_envs
+        pos: front
     exec:
-      - OS=`uname | tr '[:upper:]' '[:lower:]'` && curl -L http://enclose.alibaba-inc.com/packages/tnpm/latest/tnpm/${OS}-x64 | gunzip > tnpm
-      - cd ${source_root} && chmod +x tnpm && ls -al tnpm && mkdir -p node_modules/.bin && mv tnpm node_modules/.bin
-      - node_modules/.bin/tnpm -v
-      - node_modules/.bin/tnpm i --install-node=10 --no-cache --internal-oss-cache
-  unit_test_node_10:
-    env:
-      setting: {}
-      load: prepare_node_10
-    plugin: []
-    exec:
-      - "CI_BUILD_REF=$source_version CI_BUILD_REF_NAME=$scm_branch CI_BUILD_REPO=$scm_url CI_BUILD_URL=http://cise.alibaba-inc.com/task/$task_id/build/$build_idx node_modules/.bin/tnpm run ci"
-
+      - 'export PATH=$PWD/node_modules/.bin:$HOME/.cli:$PATH'
+      - 'echo $PATH'
+      - 'EXIT_CODE=0 && tnpm run ci || EXIT_CODE=1 && exit $EXIT_CODE'
 pipeline:
-  - 'prepare_node_10'
-  - 'unit_test_node_10'
+  - 'node-10-单元测试'
