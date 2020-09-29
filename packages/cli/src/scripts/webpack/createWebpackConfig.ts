@@ -127,9 +127,7 @@ export function createBrowserDefaults(extConfig: ExtensionBundleConfig) {
             {
               loader: require.resolve('less-loader'),
               options: {
-                lessOptions: {
-                  javascriptEnabled: true,
-                }
+                javascriptEnabled: true,
               }
             }
           ]
@@ -142,9 +140,7 @@ export function createBrowserDefaults(extConfig: ExtensionBundleConfig) {
             {
               loader: require.resolve('less-loader'),
               options: {
-                lessOptions: {
-                  javascriptEnabled: true,
-                }
+                javascriptEnabled: true,
               }
             },
           ],
