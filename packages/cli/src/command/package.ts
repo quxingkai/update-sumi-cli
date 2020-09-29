@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Command } from 'clipanion';
 import { buildWebAssetsMeta, validateMeta, rmMeta } from './../util/analysis'
 
