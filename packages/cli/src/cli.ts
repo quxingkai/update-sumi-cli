@@ -7,7 +7,7 @@ import { WatchCommand, CompileCommand } from './command/bundle';
 import { EngineUninstallCommand, EngineLsCommand, EngineLsRemoteCommand, EngineCurrentCommand, EngineUseCommand, EngineInstallCommand, engineModule } from './command/engine';
 import { DevCommand } from './command/dev';
 import { PackageCommand } from './command/package';
-import { InstallCommand, UpdateCommand } from './command/install';
+import { InstallCommand } from './command/install';
 import { PublishCommand } from './command/publish';
 import { kaitianInfraDir } from './const';
 
@@ -35,7 +35,6 @@ const cli = new Cli({
   WatchCommand,
   PackageCommand,
   InstallCommand,
-  UpdateCommand,
   PublishCommand,
   EngineLsCommand,
   EngineLsRemoteCommand,

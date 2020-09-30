@@ -46,7 +46,7 @@ class Config {
 
   public async getTeamAccount(publisher: string): Promise<ITeamAccount | undefined> {
     const content = await this.getContent();
-    return content.teamAccounts[publisher];
+    return content.teamAccounts && content.teamAccounts[publisher];
   }
 
   public async getEngineVersion(): Promise<string | undefined> {
