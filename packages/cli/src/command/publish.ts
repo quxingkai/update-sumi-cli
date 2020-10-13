@@ -53,7 +53,7 @@ export class PublishCommand extends Command {
     This command helps you publish your extension via cli.
     - The \`--file\` option is used to publish the extension package located at the specified path.
     - The \`--ignoreFile\` option is used to set an alternative file for .ktignore.
-    - If the \`--skipCompile\` flag is set, kaitian cli will skip run prepublish to compile.
+    - If the \`--skipCompile\` flag is set, kaitian cli will skip run prepublishOnly to compile.
     `,
     examples: [
       [

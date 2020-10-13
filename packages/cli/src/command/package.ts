@@ -964,17 +964,17 @@ function getDefaultPackageName(manifest) {
   return `${manifest.publisher}-${name}-${manifest.version}.zip`;
 }
 
-async function prepublish(cwd, manifest, useYarn = false) {
-  if (!manifest.scripts || !manifest.scripts['prepublish']) {
+async function prepublishOnly(cwd, manifest, useYarn = false) {
+  if (!manifest.scripts || !manifest.scripts['prepublishOnly']) {
     return;
   }
   console.warn(
-    `Executing prepublish script '${
+    `Executing prepublishOnly script '${
     useYarn ? 'yarn' : 'npm'
-    } run prepublish'...`,
+    } run prepublishOnly'...`,
   );
   const { stdout, stderr } = await exec(
-    `${useYarn ? 'yarn' : 'npm'} run prepublish`,
+    `${useYarn ? 'yarn' : 'npm'} run prepublishOnly`,
     { cwd, maxBuffer: 5000 * 1024 },
   );
   process.stdout.write(stdout);
@@ -1001,7 +1001,7 @@ async function pack(options = {}) {
     await buildWebAssetsMeta();
     const manifest = await readManifest(cwd);
     if (!options.skipCompile) {
-      await prepublish(cwd, manifest, options.useYarn);
+      await prepublishOnly(cwd, manifest, options.useYarn);
     }
     const files = await collect(manifest, options);
     await validateMeta();
@@ -1041,7 +1041,7 @@ async function packageCmd(options = {}) {
 }
 exports.packageCommand = packageCmd;
 /**
- * Lists the files included in the extension's package. Does not run prepublish.
+ * Lists the files included in the extension's package. Does not run prepublishOnly.
  */
 function listFiles(
   cwd = process.cwd(),
@@ -1055,7 +1055,7 @@ function listFiles(
 }
 exports.listFiles = listFiles;
 /**
- * Lists the files included in the extension's package. Runs prepublish.
+ * Lists the files included in the extension's package. Runs prepublishOnly.
  */
 function ls(
   cwd = process.cwd(),
@@ -1064,7 +1064,7 @@ function ls(
   ignoreFile,
 ) {
   return readManifest(cwd)
-    .then(manifest => prepublish(cwd, manifest, useYarn))
+    .then(manifest => prepublishOnly(cwd, manifest, useYarn))
     .then(() => collectFiles(cwd, useYarn, packagedDependencies, ignoreFile))
     .then(files => files.forEach(f => console.log(`${f}`)));
 }
@@ -1075,7 +1075,7 @@ export class PackageCommand extends Command {
     description: 'launch Kaitian IDE load specified extension',
     details: `
     This command helps you load extension via launching Kaitian IDE.
-    - If the \`--skipCompile\` flag is set, kaitian cli will skip run prepublish to compile.
+    - If the \`--skipCompile\` flag is set, kaitian cli will skip run prepublishOnly to compile.
     - If the \`--yarn\` flag is set, kaitian cli will use yarn instead of npm.
     - The \`--ignoreFile\` option is used to set an alternative file for .ktignore.
     - The \`-o, --out\` option is used to specify path for .vsix extension file output.
