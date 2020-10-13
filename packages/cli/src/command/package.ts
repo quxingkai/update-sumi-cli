@@ -965,7 +965,18 @@ function getDefaultPackageName(manifest) {
 }
 
 async function prepublishOnly(cwd, manifest, useYarn = false) {
-  if (!manifest.scripts || !manifest.scripts['prepublishOnly']) {
+
+  // 如果没有 scripts 字段，则不处理
+  if (!manifest.scripts) {
+    return
+  }
+
+  const hasPrepublishOnlyScript = !!manifest.scripts['prepublishOnly']
+
+  const hasPrepublishScript = !!manifest.scripts['prepublish']
+
+  // 如果没有 prepublishOnly 和 prepublish 脚本命令，则不处理
+  if (!hasPrepublishOnlyScript && !hasPrepublishScript) {
     return;
   }
   console.warn(
@@ -974,7 +985,8 @@ async function prepublishOnly(cwd, manifest, useYarn = false) {
     } run prepublishOnly'...`,
   );
   const { stdout, stderr } = await exec(
-    `${useYarn ? 'yarn' : 'npm'} run prepublishOnly`,
+    // npm@5 deprecated prepublish, 此处向下兼容处理，优先使用 prepublishOnly，fallback prepublish
+    `${useYarn ? 'yarn' : 'npm'} run ${hasPrepublishOnlyScript ? 'prepublishOnly' : 'prepublish'}`,
     { cwd, maxBuffer: 5000 * 1024 },
   );
   process.stdout.write(stdout);
