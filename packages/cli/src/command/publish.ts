@@ -2,6 +2,7 @@ import { Command } from 'clipanion';
 import os from 'os';
 
 import { marketplaceApiAddress } from '../const';
+import lodash from 'lodash';
 import { getExtPkgContent } from '../util/extension';
 import { ITeamAccount, kaitianConfiguration } from '../config';
 
@@ -83,11 +84,15 @@ export class PublishCommand extends Command {
 
   @Command.Path('publish')
   async execute() {
+    const packageJson = await getExtPkgContent();
+
     await this.publish(this.file, {
       ignoreFile: this.ignoreFile,
       skipCompile: this.skipCompile,
       privateToken: this.privateToken,
-      publisher: this.publisher,
+
+      // 保留 --publisher
+      publisher: this.publisher || lodash.get(packageJson, 'publisher'),
       name: this.name,
     });
   }
@@ -144,7 +149,6 @@ export class PublishCommand extends Command {
     name?: string,
   }) {
     const { ignoreFile, skipCompile } = options;
-
     let promise;
     if (packagePath) {
       promise = readManifestFromPackage(packagePath).then(manifest => ({
@@ -188,7 +192,7 @@ export class PublishCommand extends Command {
         masterKey: process.env.KT_EXT_MASTER_KEY,
       }
     } else {
-      teamAccount = await kaitianConfiguration.getTeamAccount(publisher);
+      teamAccount = publisher && await kaitianConfiguration.getTeamAccount(publisher);
     }
 
     if (teamAccount) {
