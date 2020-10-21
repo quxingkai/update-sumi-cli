@@ -119,27 +119,32 @@ export function createBrowserDefaults(extConfig: ExtensionBundleConfig) {
               loader: require.resolve('css-loader'),
               options: {
                 sourceMap: true,
-                modules: true,
-                localIdentName: "[local]___[hash:base64:5]"
+                modules: {
+                  localIdentName: "[local]___[hash:base64:5]"
+                }
               }
             },
             {
               loader: require.resolve('less-loader'),
               options: {
-                javascriptEnabled: true,
+                lessOptions: {
+                  javascriptEnabled: true,
+                }
               }
             }
           ]
         },
         {
-          test: /\.less$/,
+          test: /^(?!.*\.module\.less$).*\.less$/,
           use: [
             require.resolve('style-loader'),
             require.resolve('css-loader'),
             {
               loader: require.resolve('less-loader'),
               options: {
-                javascriptEnabled: true,
+                lessOptions: {
+                  javascriptEnabled: true,
+                }
               }
             },
           ],
