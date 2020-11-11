@@ -975,18 +975,22 @@ async function prepublishOnly(cwd, manifest, useYarn = false) {
 
   const hasPrepublishScript = !!manifest.scripts['prepublish']
 
-  // 如果没有 prepublishOnly 和 prepublish 脚本命令，则不处理
-  if (!hasPrepublishOnlyScript && !hasPrepublishScript) {
+  const hasVSCodePrepublishScript = !!manifest.scripts['vscode:prepublish']
+
+  // 如果没有 prepublishOnly/prepublish/vscode:prepublish 脚本命令，则不处理
+  if (!hasPrepublishOnlyScript && !hasPrepublishScript && !hasVSCodePrepublishScript) {
     return;
   }
+  const npmScript = `${useYarn ? 'yarn' : 'npm'} run ${
+    hasPrepublishOnlyScript ? 'prepublishOnly' :
+    hasPrepublishScript ? 'prepublish': 'vscode:prepublish'
+  }`;
   console.warn(
     `Executing prepublishOnly script '${
     useYarn ? 'yarn' : 'npm'
     } run prepublishOnly'...`,
   );
-  const { stdout, stderr } = await exec(
-    // npm@5 deprecated prepublish, 此处向下兼容处理，优先使用 prepublishOnly，fallback prepublish
-    `${useYarn ? 'yarn' : 'npm'} run ${hasPrepublishOnlyScript ? 'prepublishOnly' : 'prepublish'}`,
+  const { stdout, stderr } = await exec(npmScript,
     { cwd, maxBuffer: 5000 * 1024 },
   );
   process.stdout.write(stdout);
