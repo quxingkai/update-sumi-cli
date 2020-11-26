@@ -21,7 +21,6 @@ export function createNodeDefaults(extConfig: ExtensionBundleConfig) {
   const id = `${pkg.publisher}.${pkg.name}`;
 
   let defaultConfig: webpack.Configuration = {
-    mode: 'production',
     target: 'node',
     entry: extConfig.entry || {
       extension: path.join(extensionDir, 'src/extension.ts'),
@@ -51,7 +50,7 @@ export function createNodeDefaults(extConfig: ExtensionBundleConfig) {
               loader: require.resolve('ts-loader'),
               options: {
                 compilerOptions: {
-                  sourceMap: false,
+                  sourceMap: true,
                 },
               },
             },
@@ -118,7 +117,7 @@ export function createBrowserDefaults(extConfig: ExtensionBundleConfig) {
             {
               loader: require.resolve('css-loader'),
               options: {
-                sourceMap: true,
+                sourceMap: false,
                 modules: {
                   localIdentName: "[local]___[hash:base64:5]"
                 }
@@ -185,7 +184,6 @@ export function createBrowserDefaults(extConfig: ExtensionBundleConfig) {
 export function createWorkerDefaults(extConfig: ExtensionBundleConfig) {
   const { extensionDir, ...restConfig } = extConfig;
   let defaultConfig: webpack.Configuration = {
-    mode: 'production',
     target: 'webworker',
     resolve: {
       mainFields: ['module', 'main'],

@@ -69,7 +69,11 @@ async function bundle(compilerMethod: CompilerMethod, options?: RunTaskOptions) 
 
 function runTask(webpackConfig: any, compilerMethod: CompilerMethod, options?: RunTaskOptions) {
   return new Promise((resolve, reject) => {
-    const compiler = webpack(compilerMethod === 'watch' ? Object.assign(webpackConfig, { devtool: 'inline-source-map' }) : webpackConfig);
+    const compiler = webpack(
+      compilerMethod === 'watch' ?
+      Object.assign(webpackConfig, { devtool: 'source-map', mode: 'development' }) :
+      webpackConfig
+    );
 
     const callback = (err: Error, stats: any) => {
       if (err) {
