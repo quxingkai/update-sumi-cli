@@ -12,7 +12,12 @@
       "port": 9889, // 插件进程端口，不可修改
       "skipFiles": ["<node_internals>/**"],
       "sourceMaps": true, // 开启 SourceMap，便于源码映射
-      "outFiles": ["${workspaceFolder}/out/*/.js"] // 指定插件代码输出目录
+      "outFiles": ["${workspaceFolder}/out/**/*.js"], // 指定插件代码输出目录
+      "sourceMapPathOverrides": {
+        "webpack:///./~/*": "${workspaceRoot}/node_modules/*",
+        "webpack:///./*": "${workspaceRoot}/*",
+        "webpack:///*": "*"
+      }
     },
     {
       "name": "Run Extension",
