@@ -1,7 +1,7 @@
 # 不要修改该文件，会自动生成，详见 https://gitlab.alibaba-inc.com/node/ci
 
 stage:
-  node-10-单元测试:
+  node-12-单元测试:
     env:
       image: 'aone-base-global/alios7-nodejs-ci:1.0.0'
     plugin:
@@ -15,7 +15,7 @@ stage:
         pos: front
       -
         param:
-          version: node-10
+          version: node-12
           source: '${source_root}'
         name: node_envs
         pos: front
@@ -24,4 +24,4 @@ stage:
       - 'echo $PATH'
       - 'EXIT_CODE=0 && tnpm run ci || EXIT_CODE=1 && exit $EXIT_CODE'
 pipeline:
-  - 'node-10-单元测试'
+  - 'node-12-单元测试'
