@@ -82,6 +82,9 @@ export class PublishCommand extends Command {
   @Command.String('--name')
   public name?: string;
 
+  @Command.String('--useYarn')
+  public useYarn = false;
+
   @Command.Path('publish')
   async execute() {
     const packageJson = await getExtPkgContent();
@@ -94,6 +97,7 @@ export class PublishCommand extends Command {
       // 保留 --publisher
       publisher: this.publisher || lodash.get(packageJson, 'publisher'),
       name: this.name,
+      useYarn: this.useYarn,
     });
   }
 
@@ -147,8 +151,9 @@ export class PublishCommand extends Command {
     privateToken?: string,
     publisher?: string,
     name?: string,
+    useYarn: boolean
   }) {
-    const { ignoreFile, skipCompile } = options;
+    const { ignoreFile, skipCompile, useYarn } = options;
     let promise;
     if (packagePath) {
       promise = readManifestFromPackage(packagePath).then(manifest => ({
@@ -157,7 +162,6 @@ export class PublishCommand extends Command {
       }));
     } else {
       const cwd = process.cwd();
-      const useYarn = false;
 
       promise = getExtPkgContent().then(pkg => {
         return pack({
