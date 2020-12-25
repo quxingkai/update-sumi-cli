@@ -82,7 +82,7 @@ export class PublishCommand extends Command {
   @Command.String('--name')
   public name?: string;
 
-  @Command.String('--useYarn')
+  @Command.Boolean('--useYarn')
   public useYarn = false;
 
   @Command.Path('publish')

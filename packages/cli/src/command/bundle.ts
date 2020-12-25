@@ -26,7 +26,7 @@ async function getDefaultWebpackConfigs() {
 
 type CompilerMethod = 'run' | 'watch';
 
-function doWebpackTasks(webpackConfigs: webpack.Configuration[], compilerMethod: CompilerMethod) {
+function doWebpackTasks(webpackConfigs: webpack.Configuration[], compilerMethod: CompilerMethod, options?: RunTaskOptions) {
   return webpackConfigs.map(webpackConfig => {
     return async () => {
       await runTask(webpackConfig, compilerMethod, options);
