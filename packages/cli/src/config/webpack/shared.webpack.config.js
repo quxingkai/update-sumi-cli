@@ -3,7 +3,6 @@
 const path = require('path');
 const fs = require('fs');
 const merge = require('merge-options');
-const CopyWebpackPlugin = require('copy-webpack-plugin');
 const { NLSBundlePlugin } = require('vscode-nls-dev/lib/webpack-bundler');
 const { DefinePlugin } = require('webpack');
 
@@ -32,13 +31,13 @@ function withNodeDefaults(extConfig) {
             {
               // vscode-nls-dev loader:
               // * rewrite nls-calls
-              loader: 'vscode-nls-dev/lib/webpack-loader',
+              loader: require.resolve('vscode-nls-dev/lib/webpack-loader'),
               options: {
                 base: path.join(extConfig.context, 'src'),
               },
             },
             {
-              loader: 'ts-loader',
+              loader: require.resolve('ts-loader'),
               options: {
                 compilerOptions: {
                   sourceMap: false,
@@ -82,7 +81,7 @@ function withBrowserDefaults(extConfig) {
           exclude: /node_modules/,
           use: [
             {
-              loader: 'ts-loader',
+              loader: require.resolve('ts-loader'),
               options: {
                 compilerOptions: {
                   sourceMap: false,
@@ -94,10 +93,10 @@ function withBrowserDefaults(extConfig) {
         {
           test: /\.less$/,
           use: [
-            'style-loader',
-            'css-loader',
+            require.resolve('style-loader'),
+            require.resolve('css-loader'),
             {
-              loader: 'less-loader',
+              loader: require.resolve('less-loader'),
               options: {
                 lessOptions: {
                   javascriptEnabled: true,
@@ -109,8 +108,8 @@ function withBrowserDefaults(extConfig) {
         {
           test: /\.css$/,
           use: [
-            'style-loader',
-            'css-loader',
+            require.resolve('style-loader'),
+            require.resolve('css-loader'),
           ],
         },
       ],
@@ -151,7 +150,7 @@ function withWorkerDefaults(extConfig) {
           exclude: /node_modules/,
           use: [
             {
-              loader: 'ts-loader',
+              loader: require.resolve('ts-loader'),
               options: {
                 compilerOptions: {
                   sourceMap: false,

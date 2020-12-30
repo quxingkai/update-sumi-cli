@@ -14,14 +14,19 @@ import { getExtPkgContent } from '../util/extension';
 
 async function getDefaultWebpackConfigs() {
   const pkgContent = await getExtPkgContent();
+  const browserEntry = path.join(process.cwd(), 'src/extend/browser/index.ts');
+  const nodeEntry = path.join(process.cwd(), 'src/extend/node/index.ts');
+  const vscodeEntry = path.join(process.cwd(), 'src/extension.ts');
+  const workerEntry = path.join(process.cwd(), 'src/extend/worker/index.ts');
+
   return [
-    getBrowserWebpackConfig,
-    getWebpackNodeConfig,
-    getExtensionWebpackConfig,
-    getWorkerWebpackConfig,
+    fse.pathExistsSync(browserEntry) && getBrowserWebpackConfig,
+    fse.pathExistsSync(nodeEntry) && getWebpackNodeConfig,
+    fse.pathExistsSync(vscodeEntry) && getExtensionWebpackConfig,
+    fse.pathExistsSync(workerEntry) && getWorkerWebpackConfig,
   ]
-    .map(fn => fn({ cwd: process.cwd(), pkgContent }))
-    .filter(n => n);
+    .filter(n => n)
+    .map(fn => fn({ cwd: process.cwd(), pkgContent }));
 }
 
 type CompilerMethod = 'run' | 'watch';
