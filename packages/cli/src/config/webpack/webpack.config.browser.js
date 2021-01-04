@@ -11,6 +11,8 @@ module.exports = (options) => withDefaults({
 		path: path.join(options.cwd, 'out', 'browser')
   },
   externals: {
+    'react': 'React',
+    'react-dom': 'ReactDOM',
     'kaitian-browser': 'commonjs kaitian-browser',
   }
 });
