@@ -56,10 +56,10 @@ async function bundle(compilerMethod: CompilerMethod, options?: RunTaskOptions) 
       throw new Error(`请确保 ${process.cwd()} 目录下包含自定义 webpack 配置`);
     }
     const customWebpackConfig = require(webpackConfigPath);
-    bundleTasks = doWebpackTasks(toWebpackConfig(customWebpackConfig), compilerMethod);
+    bundleTasks = doWebpackTasks(toWebpackConfig(customWebpackConfig), compilerMethod, options);
   } else {
     const webpackConfigs = await getDefaultWebpackConfigs();
-    bundleTasks = doWebpackTasks(webpackConfigs, compilerMethod);
+    bundleTasks = doWebpackTasks(webpackConfigs, compilerMethod, options);
   }
 
   await parallelRunPromise(bundleTasks, 1);
