@@ -69,15 +69,14 @@ function withNodeDefaults(extConfig) {
 function withBrowserDefaults(extConfig) {
   let defaultConfig = {
     mode: 'none', // this leaves the source code as close as possible to the original (when packaging we set this to 'production')
-    target: 'webworker', // extensions run in a webworker context
     resolve: {
       mainFields: ['module', 'main'],
-      extensions: ['.ts', '.js', '.less', '.css', '.tsx', '.jsx'], // support ts-files and js-files
+      extensions: ['.ts', '.tsx', '.js', '.json', '.less', '.css'], // support ts-files and js-files
     },
     module: {
       rules: [
         {
-          test: /\.tsx$/,
+          test: /\.tsx?$/,
           exclude: /node_modules/,
           use: [
             {
