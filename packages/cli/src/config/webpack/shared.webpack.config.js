@@ -111,6 +111,16 @@ function withBrowserDefaults(extConfig) {
             require.resolve('css-loader'),
           ],
         },
+        {
+          test: /\.(woff(2)?|ttf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,
+          use: [{
+            loader: require.resolve('file-loader'),
+            options: {
+              name: '[name].[ext]',
+              outputPath: 'fonts/'
+            }
+          }]
+        },
       ],
     },
     externals: {
