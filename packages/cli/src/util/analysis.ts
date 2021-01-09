@@ -3,6 +3,7 @@ import { safeParseJson } from './json';
 import { promisify, isFunction } from 'util';
 import * as fs from 'fs';
 import * as path from 'path';
+import { loadConfig } from './load-config';
 
 export const execBasePath = process.cwd();
 
@@ -64,7 +65,6 @@ export const ANALYSIS_FIELD_PATH: { [key: string]: string | symbol | Function } 
   [`${curPrefix}.jsonValidation`]: 'url',
   [`${curPrefix}.browserMain`]: useKeyPathDirect,
   [`${curPrefix}.workerMain`]: useKeyPathDirect,
-  [`${curPrefix}.webAssets`]: useKeyPathDirect,
 }), {})
 
 const getAppendResource = (obj: any, dirPath: string): string[] => {
@@ -167,7 +167,12 @@ export const buildWebAssetsMeta = async () => {
     path.resolve(execBasePath, 'package.json')
   ]
 
-  const result = uniq(initialPaths.concat(flattenDeep( await Promise.all(ANALYSIS_ENTRY_LIST.map(filePath => analysisSingleFile(filePath)))))
+  const { webAssets } = loadConfig() || {};
+  const customPaths = (Array.isArray(webAssets) ? webAssets : [])
+    .filter(p => p && typeof p === 'string')
+    .map(p => isURL(p) ? p : path.resolve(p));
+
+  const result = uniq(initialPaths.concat(customPaths).concat(flattenDeep( await Promise.all(ANALYSIS_ENTRY_LIST.map(filePath => analysisSingleFile(filePath)))))
     .map(p => replaceAbsolutePath2relative(p)));
 
   const preFileContent = await (async () => {
