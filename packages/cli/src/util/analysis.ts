@@ -64,6 +64,7 @@ export const ANALYSIS_FIELD_PATH: { [key: string]: string | symbol | Function } 
   [`${curPrefix}.jsonValidation`]: 'url',
   [`${curPrefix}.browserMain`]: useKeyPathDirect,
   [`${curPrefix}.workerMain`]: useKeyPathDirect,
+  [`${curPrefix}.webAssets`]: useKeyPathDirect,
 }), {})
 
 const getAppendResource = (obj: any, dirPath: string): string[] => {
