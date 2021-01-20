@@ -22,6 +22,14 @@ describe('kaitian publish', () => {
     ])).toMatch(/name: test/);
   });
 
+  it('publish extension with message', async () => {
+    expect(await runCli(() => [PublishCommand], [
+      'publish',
+      '--file', path.join(__dirname, '../features/extension.zip'),
+      '--message', 'this is message',
+    ])).toMatch(/name: test/);
+  });
+
   it('publish extension without ak will throw error', async () => {
     process.env.KT_EXT_ACCOUNT_ID = '';
     process.env.KT_EXT_MASTER_KEY = '';
