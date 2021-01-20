@@ -5,6 +5,7 @@ import { marketplaceApiAddress } from '../const';
 import lodash from 'lodash';
 import { getExtPkgContent } from '../util/extension';
 import { ITeamAccount, kaitianConfiguration } from '../config';
+import qs from 'querystring';
 
 const yauzl = require('yauzl');
 const formstream = require('formstream');
@@ -85,6 +86,9 @@ export class PublishCommand extends Command {
   @Command.Boolean('--useYarn')
   public useYarn = false;
 
+  @Command.String('--message')
+  public message?: string;
+
   @Command.Path('publish')
   async execute() {
     const packageJson = await getExtPkgContent();
@@ -98,11 +102,12 @@ export class PublishCommand extends Command {
       publisher: this.publisher || lodash.get(packageJson, 'publisher'),
       name: this.name,
       useYarn: this.useYarn,
+      message: this.message,
     });
   }
 
   private async publishToMarketplace(pkgContent, options) {
-    const { name, publisher } = options;
+    const { name, publisher, message } = options;
     const { packagePath, manifest } = pkgContent;
     this.success(`Uploading ${manifest.name} to marketplace...`);
 
@@ -117,9 +122,14 @@ export class PublishCommand extends Command {
       return;
     }
 
+    const query = qs.stringify({
+      publisher,
+      message,
+    });
+
     try {
       const res = await urllib.request(
-        `${process.env.KT_EXT_ENDPOINT || marketplaceApiAddress}/extension/upload?publisher=${publisher}`,
+        `${process.env.KT_EXT_ENDPOINT || marketplaceApiAddress}/extension/upload?${query}`,
         {
           method: 'POST',
           timeout: 2 * 60 * 1000,
@@ -151,7 +161,8 @@ export class PublishCommand extends Command {
     privateToken?: string,
     publisher?: string,
     name?: string,
-    useYarn: boolean
+    useYarn: boolean,
+    message?: string,
   }) {
     const { ignoreFile, skipCompile, useYarn } = options;
     let promise;
