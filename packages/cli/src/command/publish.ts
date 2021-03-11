@@ -89,6 +89,9 @@ export class PublishCommand extends Command {
   @Command.String('--message')
   public message?: string;
 
+  @Command.String('--engine')
+  public engine?: string;
+
   @Command.Path('publish')
   async execute() {
     const packageJson = await getExtPkgContent();
@@ -103,11 +106,12 @@ export class PublishCommand extends Command {
       name: this.name,
       useYarn: this.useYarn,
       message: this.message,
+      engine: this.engine,
     });
   }
 
   private async publishToMarketplace(pkgContent, options) {
-    const { name, publisher, message } = options;
+    const { name, publisher, message, engine } = options;
     const { packagePath, manifest } = pkgContent;
     this.success(`Uploading ${manifest.name} to marketplace...`);
 
@@ -125,6 +129,7 @@ export class PublishCommand extends Command {
     const query = qs.stringify({
       publisher,
       message,
+      engine,
     });
 
     try {
@@ -163,6 +168,7 @@ export class PublishCommand extends Command {
     name?: string,
     useYarn: boolean,
     message?: string,
+    engine?: string,
   }) {
     const { ignoreFile, skipCompile, useYarn } = options;
     let promise;
