@@ -119,7 +119,7 @@ const analysisSingleFile = (filepath: string): string[] => {
         result = get(fileJsonObj, curPickPath)
       }
 
-      const skip = typeof result === 'undefined' || result.length === 0;
+      const skip = typeof result === 'undefined' || result.length === 0 || (Array.isArray(result) && result.filter(Boolean).length === 0);
 
       const rawPath2AbsolutePath = (p: string) => isURL(p) ? p : path.resolve(dirPath, p);
 
