@@ -70,7 +70,7 @@ function runTask(webpackConfig: any, compilerMethod: CompilerMethod, options?: R
     const compiler = webpack(
       compilerMethod === 'watch' ?
       Object.assign(webpackConfig, { devtool: 'source-map', mode: 'development' }) :
-      webpackConfig
+      Object.assign(webpackConfig, { devtool: false, mode: 'production' })
     );
 
     const callback = (err: Error, stats: any) => {
