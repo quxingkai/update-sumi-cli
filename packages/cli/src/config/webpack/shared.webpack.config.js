@@ -6,6 +6,12 @@ const merge = require('merge-options');
 const { NLSBundlePlugin } = require('vscode-nls-dev/lib/webpack-bundler');
 const { DefinePlugin } = require('webpack');
 
+const commonExternals = {
+  vscode: 'commonjs vscode', // ignored because it doesn't exist
+  kaitian: 'commonjs kaitian', // ignored because it doesn't exist
+  vm2: 'commonjs vm2', // ignored because it doesn't exist
+};
+
 function withNodeDefaults(extConfig) {
   const folderName = path.resolve(extConfig.context).split(/[\\\/]/)[0];
   const pkgPath = path.join(folderName, 'package.json');
@@ -49,8 +55,7 @@ function withNodeDefaults(extConfig) {
       ],
     },
     externals: {
-      vscode: 'commonjs vscode', // ignored because it doesn't exist
-      kaitian: 'commonjs kaitian', // ignored because it doesn't exist
+      ...commonExternals,
     },
     output: {
       filename: '[name].js',
@@ -124,8 +129,7 @@ function withBrowserDefaults(extConfig) {
       ],
     },
     externals: {
-      vscode: 'commonjs vscode', // ignored because it doesn't exist
-      kaitian: 'commonjs kaitian', // ignored because it doesn't exist
+      ...commonExternals,
       'kaitian-browser': 'commonjs kaitian-browser', // ignored because it doesn't exist
     },
     performance: {
@@ -171,8 +175,7 @@ function withWorkerDefaults(extConfig) {
       ],
     },
     externals: {
-      vscode: 'commonjs vscode', // ignored because it doesn't exist
-      kaitian: 'commonjs kaitian', // ignored because it doesn't exist
+      ...commonExternals,
     },
     performance: {
       hints: false,
