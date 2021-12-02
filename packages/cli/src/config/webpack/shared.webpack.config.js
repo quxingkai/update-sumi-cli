@@ -13,7 +13,7 @@ const commonExternals = {
 };
 
 function withNodeDefaults(extConfig) {
-  const folderName = path.resolve(extConfig.context).split(/[\\\/]/)[0];
+  const folderName = path.resolve(extConfig.context);
   const pkgPath = path.join(folderName, 'package.json');
   const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
   const id = `${pkg.publisher}.${pkg.name}`;
