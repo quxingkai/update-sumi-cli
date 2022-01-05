@@ -786,8 +786,8 @@ const defaultIgnore = [
   '**/*.vsixmanifest',
   '**/.vscode-test/**',
 ];
-function collectAllFiles(cwd, useYarn = false, dependencyEntryPoints) {
-  return npm.getDependencies(cwd, useYarn, dependencyEntryPoints).then(deps => {
+function collectAllFiles(cwd, useYarn = false, dependencyEntryPoints, noProd) {
+  return npm.getDependencies(cwd, useYarn, dependencyEntryPoints, noProd).then(deps => {
     const promises = deps.map(dep => {
       return promiseifyGlob('**', {
         cwd: dep,
@@ -815,8 +815,8 @@ function resolveIgnoreFile(cwd) {
     return null;
   }
 }
-function collectFiles(cwd, useYarn = false, dependencyEntryPoints, _ignoreFile) {
-  return collectAllFiles(cwd, useYarn, dependencyEntryPoints).then(files => {
+function collectFiles(cwd, useYarn = false, dependencyEntryPoints, _ignoreFile, noProd) {
+  return collectAllFiles(cwd, useYarn, dependencyEntryPoints, noProd).then(files => {
     files = files.filter(f => !/\r$/m.test(f));
     const ignoreFile = _ignoreFile || resolveIgnoreFile(cwd);
     let ignoreFiles;
@@ -856,7 +856,13 @@ function collectFiles(cwd, useYarn = false, dependencyEntryPoints, _ignoreFile) 
       ignoreFiles
         .then(ignore => [...defaultIgnore, ...ignore, '!package.json'])
         // Split into ignore and negate list
-        .then(ignore => _.partition(ignore, i => !/^\s*!/.test(i)))
+        .then(
+          ignore =>
+					ignore.reduce<[string[], string[]]>(
+						(r, e) => (!/^\s*!/.test(e) ? [[...r[0], e], r[1]] : [r[0], [...r[1], e]]),
+						[[], []]
+					),
+        )
         .then(r => ({ ignore: r[0], negate: r[1] }))
         // Filter out files
         .then(({ ignore, negate }) =>
@@ -917,7 +923,7 @@ function collect(manifest, options = {}) {
   const packagedDependencies = options.dependencyEntryPoints || undefined;
   const ignoreFile = options.ignoreFile || undefined;
   const processors = createDefaultProcessors(manifest, options);
-  return collectFiles(cwd, useYarn, packagedDependencies, ignoreFile).then(
+  return collectFiles(cwd, useYarn, packagedDependencies, ignoreFile, options.noProd).then(
     fileNames => {
       const files = fileNames.map(f => ({
         path: `extension/${f}`,
@@ -1116,6 +1122,9 @@ export class PackageCommand extends Command {
   @Command.String('--baseImagesUrl')
   public baseImagesUrl!: string;
 
+  @Command.Boolean('--no-prod')
+  public noProd!: boolean = false;
+
   @Command.Path('package')
   async execute() {
     await packageCmd({
@@ -1125,6 +1134,7 @@ export class PackageCommand extends Command {
       useYarn: this.yarn,
       ignoreFile: this.ignoreFile,
       skipCompile: this.skipCompile,
+      noProd: this.noProd,
     });
   }
 }

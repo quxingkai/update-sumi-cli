@@ -126,10 +126,10 @@ function selectYarnDependencies(deps, packagedDependencies) {
   packagedDependencies.forEach(visit);
   return reached.values;
 }
-async function getYarnProductionDependencies(cwd, packagedDependencies) {
+async function getYarnProductionDependencies(cwd, packagedDependencies, noProd) {
   const raw = await new Promise((c, e) =>
     cp.exec(
-      'yarn list --prod --json',
+      noProd ? 'yarn list --json' : 'yarn list --prod --json',
       {
         cwd,
         encoding: 'utf8',
@@ -159,21 +159,21 @@ async function getYarnProductionDependencies(cwd, packagedDependencies) {
   }
   return result;
 }
-async function getYarnDependencies(cwd, packagedDependencies) {
-  const result = [cwd];
+async function getYarnDependencies(cwd, packagedDependencies, noProd) {
+  const result = new Set([cwd]);
   if (await new Promise(c => fs.exists(path.join(cwd, 'yarn.lock'), c))) {
-    const deps = await getYarnProductionDependencies(cwd, packagedDependencies);
+    const deps = await getYarnProductionDependencies(cwd, packagedDependencies, noProd);
     const flatten = dep => {
-      result.push(dep.path);
+      result.add(dep.path);
       dep.children.forEach(flatten);
     };
     deps.forEach(flatten);
   }
-  return _.uniq(result);
+  return [...result];
 }
-function getDependencies(cwd, useYarn = false, packagedDependencies) {
+function getDependencies(cwd, useYarn = false, packagedDependencies, noProd ) {
   return useYarn
-    ? getYarnDependencies(cwd, packagedDependencies)
+    ? getYarnDependencies(cwd, packagedDependencies, noProd)
     : getNpmDependencies(cwd);
 }
 exports.getDependencies = getDependencies;
