@@ -80,6 +80,11 @@ const getAppendResource = (obj: any, dirPath: string): string[] => {
 
 const analysisSingleFile = (filepath: string): string[] => {
 
+  // 不是 json 就跳过
+  if (!filepath || !filepath.includes('.json')) {
+    return []
+  }
+
   // 循环依赖
   if (touchedFiles.has(filepath)) {
     return [];
@@ -88,11 +93,6 @@ const analysisSingleFile = (filepath: string): string[] => {
   touchedFiles.add(filepath);
 
   const dirPath = path.dirname(filepath);
-
-  // 不是 json 就跳过
-  if (!filepath.includes('.json')) {
-    return []
-  }
 
   const fileJsonObj = safeParseJson(fs.readFileSync(filepath, 'utf-8'));
 
