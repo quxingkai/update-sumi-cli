@@ -52,6 +52,7 @@ function withNodeDefaults(extConfig) {
             },
           ],
         },
+        ...(extConfig && extConfig.module && Array.isArray(extConfig.module.rules) && extConfig.module.rules || [])
       ],
     },
     externals: {

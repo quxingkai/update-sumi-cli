@@ -9,5 +9,24 @@ module.exports = (options) => withDefaults({
 	output: {
 		filename: 'index.js',
 		path: path.join(options.cwd, 'out', 'node')
-	}
+	},
+  module: {
+    rules: [
+      {
+        test: /\.ts$/,
+        exclude: /node_modules/,
+        use: [
+          {
+            loader: require.resolve('ts-loader'),
+            options: {
+              compilerOptions: {
+                // type: 'run' | 'watch'
+                sourceMap: options.compilerMethod === 'watch',
+              },
+            },
+          },
+        ],
+      },
+    ],
+  }
 });

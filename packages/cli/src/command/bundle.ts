@@ -12,7 +12,7 @@ import getWebpackNodeConfig from '../config/webpack/webpack.config.node';
 import getWorkerWebpackConfig from '../config/webpack/webpack.config.worker';
 import { getExtPkgContent } from '../util/extension';
 
-async function getDefaultWebpackConfigs() {
+async function getDefaultWebpackConfigs(compilerMethod: CompilerMethod) {
   const pkgContent = await getExtPkgContent();
   const browserEntry = path.join(process.cwd(), 'src/extend/browser/index.ts');
   const nodeEntry = path.join(process.cwd(), 'src/extend/node/index.ts');
@@ -26,7 +26,7 @@ async function getDefaultWebpackConfigs() {
     fse.pathExistsSync(workerEntry) && getWorkerWebpackConfig,
   ]
     .filter(n => n)
-    .map(fn => fn({ cwd: process.cwd(), pkgContent }));
+    .map(fn => fn({ cwd: process.cwd(), pkgContent, compilerMethod }));
 }
 
 type CompilerMethod = 'run' | 'watch';
@@ -58,7 +58,7 @@ async function bundle(compilerMethod: CompilerMethod, options?: RunTaskOptions) 
     const customWebpackConfig = require(webpackConfigPath);
     bundleTasks = doWebpackTasks(toWebpackConfig(customWebpackConfig), compilerMethod, options);
   } else {
-    const webpackConfigs = await getDefaultWebpackConfigs();
+    const webpackConfigs = await getDefaultWebpackConfigs(compilerMethod);
     bundleTasks = doWebpackTasks(webpackConfigs, compilerMethod, options);
   }
 
