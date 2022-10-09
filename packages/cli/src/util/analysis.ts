@@ -1,8 +1,9 @@
 import { get, uniq, flattenDeep } from 'lodash';
-import { safeParseJson } from './json';
 import { promisify, isFunction } from 'util';
 import * as fs from 'fs';
 import * as path from 'path';
+
+import { safeParseJson } from './json';
 import { loadConfig } from './load-config';
 
 export const execBasePath = process.cwd();

@@ -1,11 +1,11 @@
-import { Command } from 'clipanion';
 import os from 'os';
+import lodash from 'lodash';
+import qs from 'querystring';
+import { Command } from 'clipanion';
 
 import { marketplaceApiAddress } from '../const';
-import lodash from 'lodash';
 import { getExtPkgContent } from '../util/extension';
 import { ITeamAccount, kaitianConfiguration } from '../config';
-import qs from 'querystring';
 
 const yauzl = require('yauzl');
 const formstream = require('formstream');

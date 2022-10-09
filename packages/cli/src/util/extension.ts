@@ -2,13 +2,12 @@ import fs from 'fs';
 import path from 'path';
 import { promisify } from 'util';
 import { Package as NPMPackageJSON } from 'normalize-package-data';
-import { safeParseJson } from './json';
 
+import { safeParseJson } from './json';
 
 export interface ExtensionPackageJSON extends NPMPackageJSON {
   publisher: string;
 }
-
 
 export async function getExtPkgContent(): Promise<ExtensionPackageJSON | undefined> {
   try {
