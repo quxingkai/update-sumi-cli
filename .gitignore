@@ -120,3 +120,5 @@ lib
 old-hosted
 old-scripts
 tmpdir
+
+.idea
