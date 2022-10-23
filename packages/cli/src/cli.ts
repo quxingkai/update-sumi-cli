@@ -8,7 +8,6 @@ import { DevCommand } from './command/dev';
 import { InitCommand } from './command/init';
 import { LoginCommand } from './command/login';
 import { PackageCommand } from './command/package';
-import { InstallCommand } from './command/install';
 import { PublishCommand } from './command/publish';
 import { HelpCommand, VersionCommand } from './command/help';
 import { WatchCommand, CompileCommand } from './command/bundle';
@@ -34,7 +33,6 @@ const cli = new Cli({
   CompileCommand,
   WatchCommand,
   PackageCommand,
-  InstallCommand,
   PublishCommand,
   EngineLsCommand,
   EngineLsRemoteCommand,
