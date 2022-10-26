@@ -1,0 +1,5 @@
+# OpenSumi CLI
+
+## License
+
+MIT
