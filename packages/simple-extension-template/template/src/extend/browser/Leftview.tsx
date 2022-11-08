@@ -1,6 +1,6 @@
 import * as React from "react";
 import { useState, useEffect } from 'react';
-import { Button } from 'kaitian-browser';
+import { Button } from 'opensumi-browser';
 
 import { INodeService } from "../common/service";
 import './style.less';
@@ -32,7 +32,7 @@ export const Leftview: React.FC<IComponentProps<INodeService>> = ({
   }
 
   return (
-    <div className="kt-extension-example-container">
+    <div className="opensumi-extension-example-container">
       <p>{title}</p>
       <Button onClick={clickHandler}>change title</Button>
     </div>

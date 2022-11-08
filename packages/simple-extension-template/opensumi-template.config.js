@@ -3,8 +3,6 @@ module.exports = {
     _gitignore: '.gitignore',
     _vscodeignore: '.vscodeignore',
     _ktignore: '.ktignore',
-    // 'vscode/*': '.vscode/*',
-    // 'kaitian/*': '.kaitian/*',
   },
   questions: [
     {

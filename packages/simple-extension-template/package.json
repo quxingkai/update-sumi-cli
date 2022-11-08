@@ -1,5 +1,5 @@
 {
-  "name": "@opensumi/simple-ext-template",
+  "name": "@opensumi/simple-extension-template",
   "version": "1.0.0-beta.0",
   "description": "A simple extension project template for opensumi",
   "main": "",

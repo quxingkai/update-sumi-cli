@@ -17,7 +17,7 @@ type PureInitOptions = {
 
 const fsPromise = fs.promises;
 
-const defaultTemplatePkg = '@ali/kaitian-simple-ext-template';
+const defaultTemplatePkg = '@opensumi/simple-extension-template';
 
 const spinner = ora();
 
@@ -33,7 +33,7 @@ async function ensurePkgJSONFile(targetDir: string) {
     return;
   }
   const json = JSON.stringify({
-    name: '@ali/kaitian-template',
+    name: '@opensumi/extension-template',
   }, null, 2);
   await fsPromise.writeFile(targetPkgJSONPath, json, 'utf8');
 }
@@ -76,7 +76,7 @@ export async function pureInit(pureInitOptions: PureInitOptions) {
 
   try {
     const targetTemplatePath = path.resolve(templateDir, 'node_modules', targetTemplatePkg);
-    const { move } = require(path.resolve(targetTemplatePath, 'kaitian-template.config.js'));
+    const { move } = require(path.resolve(targetTemplatePath, 'opensumi-template.config.js'));
 
     const targetDir = targetPath || process.cwd();
 
@@ -99,7 +99,7 @@ async function init(targetPath: string, targetTemplatePkg: string) {
 
   try {
     const targetTemplatePath = path.resolve(templateDir, 'node_modules', targetTemplatePkg);
-    const { questions, move } = require(path.resolve(targetTemplatePath, 'kaitian-template.config.js'));
+    const { questions, move } = require(path.resolve(targetTemplatePath, 'opensumi-template.config.js'));
 
     const answers = await inquirer.prompt<any>(questions);
 
