@@ -2,7 +2,7 @@ import { Cli } from 'clipanion';
 import chalk from 'chalk';
 import semver from 'semver';
 
-import { kaitianInfraDir } from './const';
+import { opensumiInfraDir } from './const';
 import { ensureDirSync } from './util/fs';
 import { DevCommand } from './command/dev';
 import { InitCommand } from './command/init';
@@ -22,8 +22,8 @@ const pkg = require('../package.json');
 })();
 
 const cli = new Cli({
-  binaryLabel: 'Kaitian IDE Extension Development Utility',
-  binaryName: 'kaitian',
+  binaryLabel: 'OpenSumi Extension Development Utility',
+  binaryName: 'opensumi',
   binaryVersion: pkg.version,
 });
 
@@ -54,7 +54,7 @@ function checkNodeVersion() {
     console.log(
       `\n`,
       chalk.red(
-        `You must upgrade node to ${pkg.engines.node} to use Kaitian Cli`,
+        `You must upgrade node to ${pkg.engines.node} to use OpenSumi Cli`,
       ),
       `\n`,
     );
@@ -63,5 +63,5 @@ function checkNodeVersion() {
 }
 
 function preJobs() {
-  ensureDirSync(kaitianInfraDir);
+  ensureDirSync(opensumiInfraDir);
 }

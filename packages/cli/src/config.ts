@@ -1,5 +1,5 @@
 import { YmlConfiguration } from './util/yml-config';
-import { kaitianInfraDir } from './const';
+import { opensumiInfraDir } from './const';
 
 export interface ITeamAccount {
   accountId: string;
@@ -15,7 +15,7 @@ export interface IConfig {
 
 class Config {
   private configYml: YmlConfiguration = new YmlConfiguration<IConfig>(
-    kaitianInfraDir,
+    opensumiInfraDir,
     'config.yml',
     { teamAccounts: {} },
   );

@@ -1,0 +1,13 @@
+{
+  "name": "@opensumi/simple-ext-template",
+  "version": "1.0.0-beta.0",
+  "description": "A simple extension project template for opensumi",
+  "main": "",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
+  },
+  "scripts": {},
+  "engines": {
+    "node": ">=10.15.0"
+  }
+}

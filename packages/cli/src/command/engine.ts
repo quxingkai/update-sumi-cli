@@ -14,12 +14,12 @@ import semver from 'semver';
 import { safeParseJson } from '../util/json';
 import { ensureDir } from '../util/fs';
 
-import { kaitianInfraDir, npmClient, enginePkgName } from '../const';
+import { opensumiInfraDir, npmClient, enginePkgName } from '../const';
 import { kaitianConfiguration } from '../config';
 
 const fsPromise = fs.promises;
 
-const engineDir = path.resolve(kaitianInfraDir, 'engines');
+const engineDir = path.resolve(opensumiInfraDir, 'engines');
 
 function getEngineFolderPath(version: string) {
   return path.join(engineDir, version);
@@ -180,7 +180,7 @@ class EngineModule {
 
   // memoized for 5s
   public async getInstalledEngines() {
-    await ensureDir(kaitianInfraDir);
+    await ensureDir(opensumiInfraDir);
     await ensureDir(engineDir);
     const files = await fsPromise.readdir(engineDir);
     const fileNameList = await Promise.all(files.map(async (fileName) => {

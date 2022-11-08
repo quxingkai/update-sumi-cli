@@ -1,1 +1,1 @@
-# Simple Kaitian extension project template
+# Simple OpenSumi extension project template

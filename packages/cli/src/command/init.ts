@@ -7,7 +7,7 @@ import ora from 'ora';
 import execa from 'execa';
 import copy from 'kopy';
 
-import { npmClient, kaitianInfraDir } from '../const';
+import { npmClient, opensumiInfraDir } from '../const';
 
 type PureInitOptions = {
   templateData: string
@@ -21,7 +21,7 @@ const defaultTemplatePkg = '@ali/kaitian-simple-ext-template';
 
 const spinner = ora();
 
-const templateDir = path.resolve(kaitianInfraDir, 'template');
+const templateDir = path.resolve(opensumiInfraDir, 'template');
 
 async function ensurePkgJSONFile(targetDir: string) {
   if (!fs.existsSync(targetDir)) {
@@ -50,7 +50,7 @@ function logMsg() {
     ${chalk.yellow('  npm run compile')}
 
     打包插件.
-    ${chalk.yellow('  kaitian package')}
+    ${chalk.yellow('  opensumi package')}
 
     Happy hacking!
   `);
@@ -89,7 +89,7 @@ export async function pureInit(pureInitOptions: PureInitOptions) {
   }
 }
 
-// katiian init --name {name} --displayName {displayName} --publisher {publisher}
+// opensumi init --name {name} --displayName {displayName} --publisher {publisher}
 async function init(targetPath: string, targetTemplatePkg: string) {
   await ensurePkgJSONFile(templateDir);
   spinner.start(`Downloading template package ${targetTemplatePkg}`);
@@ -113,15 +113,15 @@ async function init(targetPath: string, targetTemplatePkg: string) {
   } catch (err) {
     console.log(err.stack);
   }
-};
+}
 
 export class InitCommand extends Command {
   static usage = Command.Usage({
-    description: 'init a new extension powered by kaitian',
+    description: 'init a new extension powered by opensumi',
     examples: [
       [
-        'Initialize a kaitian extension project in target-folder',
-        'cd target-folder && kaitian init',
+        'Initialize a opensumi extension project in target-folder',
+        'cd target-folder && opensumi init',
       ],
     ],
   });
@@ -157,7 +157,6 @@ export class InitCommand extends Command {
       this.templateData,
     ].every(filed => !!filed);
 
-
     try {
       isPureInit
       ? (await pureInit({
@@ -167,7 +166,7 @@ export class InitCommand extends Command {
       } as PureInitOptions))
       : (await init(this.realTargetDir, this.scaffold));
     } catch (err) {
-      console.error('kaitian init error:', err);
+      console.error('opensumi init error:', err);
       process.exit(1);
     }
   }
