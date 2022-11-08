@@ -5,7 +5,7 @@ import { Command } from 'clipanion';
 
 import { marketplaceApiAddress } from '../const';
 import { getExtPkgContent } from '../util/extension';
-import { ITeamAccount, kaitianConfiguration } from '../config';
+import { ITeamAccount, opensumiConfiguration } from '../config';
 
 const yauzl = require('yauzl');
 const formstream = require('formstream');
@@ -213,7 +213,7 @@ export class PublishCommand extends Command {
         masterKey: process.env.KT_EXT_MASTER_KEY,
       }
     } else {
-      teamAccount = publisher && await kaitianConfiguration.getTeamAccount(publisher);
+      teamAccount = publisher && await opensumiConfiguration.getTeamAccount(publisher);
     }
 
     if (teamAccount) {

@@ -55,4 +55,4 @@ class Config {
   }
 }
 
-export const kaitianConfiguration = new Config();
+export const opensumiConfiguration = new Config();

@@ -1,4 +1,3 @@
-import os from 'os';
 import path from 'path';
 import fs from 'fs';
 import { promisify } from 'util';
@@ -15,7 +14,7 @@ import { safeParseJson } from '../util/json';
 import { ensureDir } from '../util/fs';
 
 import { opensumiInfraDir, npmClient, enginePkgName } from '../const';
-import { kaitianConfiguration } from '../config';
+import { opensumiConfiguration } from '../config';
 
 const fsPromise = fs.promises;
 
@@ -66,12 +65,12 @@ class EngineModule {
   }
 
   get current() {
-    return kaitianConfiguration.content.engine || '';
+    return opensumiConfiguration.content.engine || '';
   }
 
   set current(value: string) {
-    const config = kaitianConfiguration.content;
-    kaitianConfiguration.content = { ...config, engine: value };
+    const config = opensumiConfiguration.content;
+    opensumiConfiguration.content = { ...config, engine: value };
   }
 
   @whenReady
@@ -214,11 +213,11 @@ class EngineModule {
   }
 
   private async getCurrent() {
-    return await kaitianConfiguration.getEngineVersion() || '';
+    return await opensumiConfiguration.getEngineVersion() || '';
   }
 
   private async setCurrent(value: string) {
-    await kaitianConfiguration.updateContent({ engine: value });
+    await opensumiConfiguration.updateContent({ engine: value });
     console.log(`Set v${value} as the current engine`);
   }
 
@@ -234,11 +233,11 @@ class EngineModule {
       // console.warn('Please exec `kaitian cli install`');
     }
 
-    const config = await kaitianConfiguration.getContent();
+    const config = await opensumiConfiguration.getContent();
     if (!config.engine || !engineList.includes(config.engine)) {
       // fallback to the first in engineList
       const current = engineList[0];
-      await kaitianConfiguration.replaceContent({ ...config, engine: current });
+      await opensumiConfiguration.replaceContent({ ...config, engine: current });
       // console.warn(`We are using engine@v${current }`);
     }
   }

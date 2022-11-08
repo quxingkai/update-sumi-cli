@@ -1,9 +1,9 @@
-import { Command } from 'clipanion';
-import inquirer from 'inquirer';
-
-import { kaitianConfiguration } from '../config';
-import { getExtPkgContent } from '../util/extension';
 import chalk from 'chalk';
+import inquirer from 'inquirer';
+import { Command } from 'clipanion';
+
+import { opensumiConfiguration } from '../config';
+import { getExtPkgContent } from '../util/extension';
 
 export class LoginCommand extends Command {
   static usage = Command.Usage({
@@ -29,7 +29,7 @@ export class LoginCommand extends Command {
       publisher = answers.publisher;
     }
 
-    const config = await kaitianConfiguration.getContent();
+    const config = await opensumiConfiguration.getContent();
 
     const ifExistedTeamAccount = config.teamAccounts[publisher];
     if (ifExistedTeamAccount && ifExistedTeamAccount.accountId && ifExistedTeamAccount.masterKey) {
@@ -56,7 +56,7 @@ export class LoginCommand extends Command {
     ]);
 
     config.teamAccounts[publisher] = { ...answers };
-    await kaitianConfiguration.replaceContent(config);
+    await opensumiConfiguration.replaceContent(config);
 
     this.context.stdout.write(chalk.green(`Login successfully for publisher:${publisher}`));
   }
