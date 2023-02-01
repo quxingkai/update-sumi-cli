@@ -1,15 +1,15 @@
 import * as React from "react";
 import { useState, useEffect } from 'react';
-import { Button } from 'opensumi-browser';
+import { Button } from 'sumi-browser';
 
 import { INodeService } from "../common/service";
 import './style.less';
 
-const defaultTitle = "左侧面板";
+const defaultTitle = "Left Panel";
 
 export const Leftview: React.FC<IComponentProps<INodeService>> = ({
-  kaitianExtendSet,
-  kaitianExtendService,
+  sumiExtendSet,
+  sumiExtendService,
 }) => {
   const [title, setTitle] = useState(defaultTitle);
 
@@ -18,15 +18,15 @@ export const Leftview: React.FC<IComponentProps<INodeService>> = ({
   }
 
   useEffect(() => {
-    if (kaitianExtendSet) {
-      kaitianExtendSet.set({
+    if (sumiExtendSet) {
+      sumiExtendSet.set({
         updateTitle: onDidUpdateTitle,
       });
     }
   }, []);
 
   function clickHandler() {
-    kaitianExtendService.node.sayHello().then(msg => {
+    sumiExtendService.node.sayHello().then(msg => {
       console.log("Leftview receive message", msg);
     });
   }

@@ -23,7 +23,7 @@ const pkg = require('../package.json');
 
 const cli = new Cli({
   binaryLabel: 'OpenSumi Extension Development Utility',
-  binaryName: 'opensumi',
+  binaryName: 'sumi',
   binaryVersion: pkg.version,
 });
 
@@ -33,16 +33,16 @@ const cli = new Cli({
   CompileCommand,
   WatchCommand,
   PackageCommand,
-  PublishCommand,
   EngineLsCommand,
   EngineLsRemoteCommand,
   EngineCurrentCommand,
   EngineUseCommand,
   EngineInstallCommand,
   EngineUninstallCommand,
-  LoginCommand,
   HelpCommand,
   VersionCommand,
+  // PublishCommand,
+  // LoginCommand,
 ].forEach((command) => {
   cli.register(command);
 });

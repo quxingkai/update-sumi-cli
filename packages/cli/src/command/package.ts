@@ -172,7 +172,7 @@ class ManifestProcessor extends BaseProcessor {
       displayName: manifest.displayName || manifest.name,
       version: manifest.version,
       publisher: manifest.publisher,
-      engine: manifest.engines.kaitian,
+      engine: manifest.engines.sumi,
       description: manifest.description || '',
       categories: (manifest.categories || []).join(','),
       flags: flags.join(' '),
@@ -663,8 +663,8 @@ function validateManifest(manifest) {
     throw new Error('Manifest missing field: engines');
   }
 
-  if (!manifest.engines['kaitian']) {
-    throw new Error('Manifest missing field: engines.kaitian');
+  if (!manifest.engines['opensumi']) {
+    throw new Error('Manifest missing field: engines.opensumi');
   }
 
   (manifest.badges || []).forEach(badge => {
@@ -760,7 +760,7 @@ function toContentTypes(files) {
 exports.toContentTypes = toContentTypes;
 const defaultIgnore = [
   '.vscodeignore',
-  '.ktignore',
+  '.sumiignore',
   'package-lock.json',
   'yarn.lock',
   '.editorconfig',
@@ -804,13 +804,13 @@ function collectAllFiles(cwd, useYarn = false, dependencyEntryPoints, noProd) {
   });
 }
 function resolveIgnoreFile(cwd) {
-  if (fs.existsSync(path.join(cwd, '.ktignore'))) {
-    return path.join(cwd, '.ktignore');
+  if (fs.existsSync(path.join(cwd, '.sumiignore'))) {
+    return path.join(cwd, '.sumiignore');
   } else if (fs.existsSync(path.join(cwd, '.vscodeignore'))) {
     return path.join(cwd, '.vscodeignore');
   } else {
     console.log(`
-    为了优化构建性能，建议您在项目中创建 .ktignore 文件排除运行时不必要的文件.
+    To optimize build performance, it is recommended that you create a \`.sumiignore\` file in your project to exclude unnecessary files at runtime.
     `);
     return null;
   }
@@ -1030,7 +1030,7 @@ async function pack(options = {}) {
     const jsFiles = files.filter(f => /\.js$/i.test(f.path));
     if (files.length > 5000 || jsFiles.length > 100) {
       console.log(
-        `此插件由 ${files.length} 个文件组成，其中包含 ${jsFiles.length} 个 JavaScript 文件，出于性能原因，建议您仅打包必要运行文件，您还可以通过配置 .ktignore 或 .vscodeignore 文件来排除不必要的文件`,
+        `This plugin consists of ${files.length} files, including ${jsFiles.length} JavaScript files. For performance reasons, it is recommended that you only package the necessary running files. You can also configure the \`.sumiignore\` or \`.vscodeignore\` file to Exclude unnecessary files`
       );
     }
     const packagePath = await getPackagePath(cwd, manifest, options);
@@ -1094,13 +1094,14 @@ exports.ls = ls;
 
 export class PackageCommand extends Command {
   static usage = Command.Usage({
-    description: 'launch Kaitian IDE load specified extension',
+    description: 'Package the extension',
     details: `
-    This command helps you load extension via launching Kaitian IDE.
-    - If the \`--skipCompile\` flag is set, kaitian cli will skip run prepublishOnly to compile.
-    - If the \`--yarn\` flag is set, kaitian cli will use yarn instead of npm.
-    - The \`--ignoreFile\` option is used to set an alternative file for .ktignore.
+    This command helps you package your extension via cli.
     - The \`-o, --out\` option is used to specify path for .vsix extension file output.
+    - If the \`--yarn\` flag is set, OpenSumi CLI will use yarn instead of npm.
+    - The \`--ignoreFile\` option is used to set an alternative file for .sumiignore.
+    - If the \`--skipCompile\` flag is set, OpenSumi CLI will skip run prepublishOnly to compile.
+    - If the \`--no-prod\` flag is set, OpenSumi CLI will package non-production modules when use yarn.
     `,
   });
 

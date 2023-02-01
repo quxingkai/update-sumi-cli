@@ -26,7 +26,7 @@ function getEngineFolderPath(version: string) {
 
 async function updatePkgJSONFile(targetDir: string, version: string) {
   const pkgJsonDesc = {
-    name: '@ali/kaitian-engine',
+    name: '@opensumi/engine',
     version,
     dependencies: {
       [enginePkgName]: version,
@@ -59,8 +59,6 @@ class EngineModule {
       process.exit(1);
     }
 
-    // console.log
-    // /engines/1.0.0-alpha.0/node_modules/@ali/kaitian-integration/lib
     return path.join(engineDir, this.current, 'node_modules', enginePkgName, 'lib');
   }
 
@@ -229,8 +227,8 @@ class EngineModule {
   private async init() {
     const engineList = await this.getInstalledEngines();
     if (!engineList.length) {
-      // console.warn('No engine installed');
-      // console.warn('Please exec `kaitian cli install`');
+      console.warn('No engine installed');
+      console.warn('Please exec `sumi engine add <version>`');
     }
 
     const config = await opensumiConfiguration.getContent();

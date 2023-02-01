@@ -52,15 +52,15 @@ export class PublishCommand extends Command {
   static usage = Command.Usage({
     description: 'publish the extension',
     details: `
-    This command helps you publish your extension via cli.
+    This command helps you publish your extension via CLI.
     - The \`--file\` option is used to publish the extension package located at the specified path.
-    - The \`--ignoreFile\` option is used to set an alternative file for .ktignore.
-    - If the \`--skipCompile\` flag is set, kaitian cli will skip run prepublishOnly to compile.
+    - The \`--ignoreFile\` option is used to set an alternative file for .sumiignore.
+    - If the \`--skipCompile\` flag is set, OpenSumi CLI will skip run prepublishOnly to compile.
     `,
     examples: [
       [
         'Examples:',
-        'kaitian publish --file=./my-extension-1.0.0.zip.'
+        'sumi publish --file=./my-extension-1.0.0.zip.'
       ],
     ],
   });

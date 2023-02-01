@@ -7,7 +7,7 @@ import ora from 'ora';
 import execa from 'execa';
 import copy from 'kopy';
 
-import { npmClient, opensumiInfraDir } from '../const';
+import { npmClient, opensumiInfraDir, defaultTemplatePkg, templateConfigFile } from '../const';
 
 type PureInitOptions = {
   templateData: string
@@ -16,8 +16,6 @@ type PureInitOptions = {
 }
 
 const fsPromise = fs.promises;
-
-const defaultTemplatePkg = '@opensumi/simple-extension-template';
 
 const spinner = ora();
 
@@ -40,17 +38,17 @@ async function ensurePkgJSONFile(targetDir: string) {
 
 function logMsg() {
   console.log(`
-    插件初始化成功.
-    依次执行以下命令开始插件开发:
+    Extension initialization succeeded
+    Execute the following commands to start extension development:
 
     ${chalk.yellow('  npm install')}
     ${chalk.yellow('  npm run watch')}
 
-    编译插件.
+    Compile extension.
     ${chalk.yellow('  npm run compile')}
 
-    打包插件.
-    ${chalk.yellow('  opensumi package')}
+    Package extension.
+    ${chalk.yellow('  sumi package')}
 
     Happy hacking!
   `);
@@ -76,7 +74,7 @@ export async function pureInit(pureInitOptions: PureInitOptions) {
 
   try {
     const targetTemplatePath = path.resolve(templateDir, 'node_modules', targetTemplatePkg);
-    const { move } = require(path.resolve(targetTemplatePath, 'opensumi-template.config.js'));
+    const { move } = require(path.resolve(targetTemplatePath, templateConfigFile));
 
     const targetDir = targetPath || process.cwd();
 
@@ -99,7 +97,7 @@ async function init(targetPath: string, targetTemplatePkg: string) {
 
   try {
     const targetTemplatePath = path.resolve(templateDir, 'node_modules', targetTemplatePkg);
-    const { questions, move } = require(path.resolve(targetTemplatePath, 'opensumi-template.config.js'));
+    const { questions, move } = require(path.resolve(targetTemplatePath, templateConfigFile));
 
     const answers = await inquirer.prompt<any>(questions);
 
@@ -121,7 +119,7 @@ export class InitCommand extends Command {
     examples: [
       [
         'Initialize a opensumi extension project in target-folder',
-        'cd target-folder && opensumi init',
+        'cd target-folder && sumi init',
       ],
     ],
   });
@@ -166,7 +164,7 @@ export class InitCommand extends Command {
       } as PureInitOptions))
       : (await init(this.realTargetDir, this.scaffold));
     } catch (err) {
-      console.error('opensumi init error:', err);
+      console.error('sumi init error:', err);
       process.exit(1);
     }
   }
