@@ -34,7 +34,6 @@ async function updatePkgJSONFile(targetDir: string, version: string) {
   };
   const json = JSON.stringify(pkgJsonDesc, null, 2);
   const pkgJSONFilePath = path.join(targetDir, 'package.json');
-  // await fsPromise.open(pkgJSONFilePath, 'w');
   await fsPromise.writeFile(pkgJSONFilePath, json, 'utf8');
 }
 
@@ -85,11 +84,12 @@ class EngineModule {
     }
 
     const spinner = ora(`Adding engine@v${version}`).start();
-    await this.installEngine(engineDir, version);
-    spinner.succeed(`Engine@v${version} was installed`);
-    if (!await this.getCurrent()) {
-      await this.setCurrent(version);
-    }
+    return this.installEngine(engineDir, version).then(async () => {
+      spinner.succeed(`Engine@v${version} was installed`);
+      if (!await this.getCurrent()) {
+        await this.setCurrent(version);
+      }
+    });
   }
 
   public async remove(v?: string) {
