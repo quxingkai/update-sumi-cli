@@ -16,9 +16,9 @@
 
 ## Develop
 
-```base
-$ npm install
-$ npm run dev
+```bash
+$ yarn
+$ yarn dev
 ```
 
 Test command on the local:
@@ -27,13 +27,23 @@ Test command on the local:
 $ ./packages/cli/bin/sumi.js <command> [options]
 ```
 
-## Install
+## Publish
+
+```bash
+$ yarn release
+```
+
+Then push commits and tag to the main branch, the `@opensumi/cli@{tag_version}` will release automatically.
+
+## Usage
+
+Install `@opensumi/cli`:
 
 ```
 $ npm install @opensumi/cli -g
 ```
 
-## Usage
+Initailize the template:
 
 ```
 $ sumi init opensumi-ext-demo
