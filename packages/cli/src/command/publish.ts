@@ -232,4 +232,15 @@ export class PublishCommand extends Command {
   private error(msg: string) {
     this.context.stderr.write(`${chalk.red(msg)}\n`);
   }
+
+  @Command.Path('generate-banner')
+  async generateBanner() {
+    const packageJson = await getExtPkgContent();
+    const banner = `
+      Extension Name: ${packageJson.name}
+      Publisher: ${packageJson.publisher}
+      Version: ${packageJson.version}
+    `;
+    this.context.stdout.write(banner);
+  }
 }
