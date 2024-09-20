@@ -41,8 +41,8 @@ const cli = new Cli({
   EngineUninstallCommand,
   HelpCommand,
   VersionCommand,
-  // PublishCommand,
-  // LoginCommand,
+  PublishCommand,
+  LoginCommand,
 ].forEach((command) => {
   cli.register(command);
 });
