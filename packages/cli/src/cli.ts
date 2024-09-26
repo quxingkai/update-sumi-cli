@@ -12,6 +12,7 @@ import { PublishCommand } from './command/publish';
 import { HelpCommand, VersionCommand } from './command/help';
 import { WatchCommand, CompileCommand } from './command/bundle';
 import { EngineUninstallCommand, EngineLsCommand, EngineLsRemoteCommand, EngineCurrentCommand, EngineUseCommand, EngineInstallCommand, engineModule } from './command/engine';
+import { TestCommand } from './command/test';
 
 const pkg = require('../package.json');
 
@@ -41,8 +42,9 @@ const cli = new Cli({
   EngineUninstallCommand,
   HelpCommand,
   VersionCommand,
-  // PublishCommand,
-  // LoginCommand,
+  PublishCommand,
+  LoginCommand,
+  TestCommand,
 ].forEach((command) => {
   cli.register(command);
 });
