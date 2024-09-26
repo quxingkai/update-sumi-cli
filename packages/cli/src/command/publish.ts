@@ -2,6 +2,7 @@ import os from 'os';
 import lodash from 'lodash';
 import qs from 'querystring';
 import { Command } from 'clipanion';
+import webpack from 'webpack';
 
 import { marketplaceApiAddress } from '../const';
 import { getExtPkgContent } from '../util/extension';
@@ -117,8 +118,9 @@ export class PublishCommand extends Command {
 
     const form = formstream();
     form.file('file', packagePath);
-    // 处理部分内部包带有 @ali/alipay 前缀导致 name 跟插件市场的 name 不一致的问题
-    form.field('name', name || manifest.kaitianExtensionId || manifest.name);
+    // 处理部分内部包带有 @ali/alipay 前�
+
+
     const headers = await this.getHeaders(options);
 
     if (!headers) {
